@@ -103,6 +103,39 @@ def make_og_image() -> None:
     print(f"[OK] {out} ({W}x{H})")
 
 
+def make_favicon_ico() -> None:
+    """favicon.ico — 다중 사이즈(16/32/48) ICO. 구형 IE / 일부 RSS 리더 호환."""
+    sizes = [16, 32, 48]
+    images = []
+    for size in sizes:
+        img = gradient_bg(size, size, PURPLE, INDIGO).convert("RGBA")
+        draw = ImageDraw.Draw(img, "RGBA")
+        margin = max(1, size // 8)
+        x0, y0 = margin, margin
+        x1, y1 = size - margin, size - margin
+        leader_w = int((x1 - x0) * 0.55)
+        # Leader (white)
+        draw.rectangle([x0, y0, x0 + leader_w - 1, y1], fill=(255, 255, 255, 235))
+        # 4 sub panes
+        right_x = x0 + leader_w + max(1, size // 32)
+        right_w = x1 - right_x
+        sub_h = (y1 - y0) / 4
+        colors = [
+            (253, 224, 71, 235),
+            (74, 222, 128, 235),
+            (56, 189, 248, 235),
+            (248, 113, 113, 235),
+        ]
+        for i, color in enumerate(colors):
+            sy = y0 + i * sub_h
+            draw.rectangle([right_x, sy, x1, sy + sub_h - max(1, size // 32)], fill=color)
+        images.append(img)
+
+    out = OUT / "favicon.ico"
+    images[0].save(out, format="ICO", sizes=[(s, s) for s in sizes], append_images=images[1:])
+    print(f"[OK] {out} (multi-size ICO: {sizes})")
+
+
 def make_favicon() -> None:
     """favicon: 32x32 / 180x180 (apple-touch-icon)."""
     for size in (32, 180):
@@ -145,4 +178,5 @@ def make_favicon() -> None:
 if __name__ == "__main__":
     make_og_image()
     make_favicon()
-    print("\n생성 완료. docs/og-image.png, docs/favicon.png, docs/favicon-180.png 확인.")
+    make_favicon_ico()
+    print("\n생성 완료. docs/og-image.png, docs/favicon.{svg,png,ico}, docs/favicon-180.png 확인.")
