@@ -1,20 +1,21 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MINTORAIN Tmux Ocastra — 5개의 Claude를 한 화면에서 동시에</title>
   <meta name="description" content="터미널 한 번 띄우면 기획자/프론트/백엔드/QA가 자동 소환되는 Claude Code 팀 에이전트 키트. macOS/Linux/Windows 네이티브 지원." />
 
-  <!-- Favicon (모던→구형 fallback 순서) -->
+  <!-- Favicon (모던→구형 fallback) -->
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link rel="icon" type="image/png" sizes="32x32" href="favicon.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png" />
   <link rel="shortcut icon" href="favicon.ico" />
   <link rel="canonical" href="https://mintorain.github.io/mintorain-tmux-ocastra/" />
-  <meta name="theme-color" content="#7C3AED" />
+  <meta name="theme-color" content="#7C3AED" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#F5F3FF" media="(prefers-color-scheme: light)" />
 
-  <!-- OG / SNS 미리보기 -->
+  <!-- OG / SNS -->
   <meta property="og:type" content="website" />
   <meta property="og:locale" content="ko_KR" />
   <meta property="og:title" content="MINTORAIN Tmux Ocastra — Claude Code 팀 에이전트 키트" />
@@ -24,33 +25,62 @@
   <meta property="og:image" content="https://mintorain.github.io/mintorain-tmux-ocastra/og-image.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content="MINTORAIN Tmux Ocastra - 5개의 Claude를 한 화면에서 동시에" />
+  <meta property="og:image:alt" content="MINTORAIN Tmux Ocastra — 5개의 Claude를 한 화면에서 동시에" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="MINTORAIN Tmux Ocastra — Claude Code 팀 에이전트 키트" />
-  <meta name="twitter:description" content="5개의 Claude를 한 화면에서 동시에. tmux/Zellij 5분할로 기획자·프론트·백엔드·QA·리더가 자동 소환." />
+  <meta name="twitter:title" content="MINTORAIN Tmux Ocastra" />
+  <meta name="twitter:description" content="5개의 Claude를 한 화면에서 동시에." />
   <meta name="twitter:image" content="https://mintorain.github.io/mintorain-tmux-ocastra/og-image.png" />
 
-  <!-- TailwindCSS CDN -->
+  <!-- 구조화 데이터 (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareSourceCode",
+    "name": "MINTORAIN Tmux Ocastra",
+    "description": "Claude Code 5분할 팀 에이전트 자동화 키트",
+    "codeRepository": "https://github.com/mintorain/mintorain-tmux-ocastra",
+    "programmingLanguage": ["Bash", "PowerShell", "YAML", "KDL"],
+    "operatingSystem": ["macOS", "Linux", "Windows"],
+    "license": "https://opensource.org/licenses/MIT",
+    "author": {
+      "@type": "Organization",
+      "name": "두온교육 바이브코딩 교육센터",
+      "url": "https://mintorain.duonedu.net"
+    }
+  }
+  </script>
+
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
           colors: {
             mintorain: {
-              50: '#F5F3FF',
-              100: '#EDE9FE',
-              500: '#8B5CF6',
-              600: '#7C3AED',
-              700: '#6D28D9',
-              800: '#5B21B6',
-              900: '#4C1D95',
-              ink: '#1E1B4B',
+              50: '#F5F3FF', 100: '#EDE9FE', 200: '#DDD6FE', 300: '#C4B5FD',
+              400: '#A78BFA', 500: '#8B5CF6', 600: '#7C3AED', 700: '#6D28D9',
+              800: '#5B21B6', 900: '#4C1D95', ink: '#1E1B4B',
             }
           },
           fontFamily: {
             sans: ['"Pretendard Variable"', 'Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
             mono: ['"JetBrains Mono"', 'D2Coding', 'Consolas', 'monospace'],
+          },
+          keyframes: {
+            'fade-up': {
+              '0%': { opacity: '0', transform: 'translateY(24px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            'pulse-soft': {
+              '0%, 100%': { opacity: '1' },
+              '50%': { opacity: '0.7' },
+            }
+          },
+          animation: {
+            'fade-up': 'fade-up 0.7s ease-out forwards',
+            'pulse-soft': 'pulse-soft 2.5s ease-in-out infinite',
           }
         }
       }
@@ -62,444 +92,652 @@
         href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
 
   <style>
-    html { scroll-behavior: smooth; }
+    /* 다크/라이트 모드 색상 토큰 */
+    :root {
+      --bg-primary: #1E1B4B;
+      --bg-card: rgba(255, 255, 255, 0.05);
+      --bg-card-hover: rgba(255, 255, 255, 0.08);
+      --text-primary: #F1F5F9;
+      --text-secondary: #CBD5E1;
+      --text-muted: #94A3B8;
+      --border: rgba(255, 255, 255, 0.1);
+      --accent: #A78BFA;
+    }
+    .light {
+      --bg-primary: #FAFAFC;
+      --bg-card: rgba(124, 58, 237, 0.04);
+      --bg-card-hover: rgba(124, 58, 237, 0.08);
+      --text-primary: #1E1B4B;
+      --text-secondary: #475569;
+      --text-muted: #64748B;
+      --border: rgba(124, 58, 237, 0.15);
+      --accent: #6D28D9;
+    }
+    body {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    .text-secondary { color: var(--text-secondary); }
+    .text-muted { color: var(--text-muted); }
+    .bg-card { background: var(--bg-card); border-color: var(--border); }
+    .bg-card:hover { background: var(--bg-card-hover); }
+
+    /* 그라디언트 */
     .gradient-text {
       background: linear-gradient(135deg, #A78BFA 0%, #7C3AED 50%, #4F46E5 100%);
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    .gradient-bg {
-      background: linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #1E1B4B 100%);
+    .light .gradient-text {
+      background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 50%, #312E81 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
+
+    /* 그리드 배경 */
     .grid-bg {
       background-image:
         linear-gradient(rgba(124, 58, 237, 0.08) 1px, transparent 1px),
         linear-gradient(90deg, rgba(124, 58, 237, 0.08) 1px, transparent 1px);
       background-size: 40px 40px;
+      mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 75%);
     }
+
+    /* 카드 hover */
     .card {
-      transition: transform .2s ease, box-shadow .2s ease;
+      transition: transform .25s cubic-bezier(.4,0,.2,1), box-shadow .25s, border-color .25s;
+      will-change: transform;
     }
     .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 24px 48px -12px rgba(124, 58, 237, 0.25);
+      transform: translateY(-6px);
+      box-shadow: 0 28px 56px -16px rgba(124, 58, 237, 0.4);
+      border-color: rgba(167, 139, 250, 0.5);
     }
+
+    /* 터미널 */
     .terminal {
       background: #0F0E1A;
       border: 1px solid #2D2A4A;
-      border-radius: 12px;
-      box-shadow: 0 20px 60px -10px rgba(124, 58, 237, 0.4);
+      border-radius: 14px;
+      box-shadow: 0 24px 80px -12px rgba(124, 58, 237, 0.5), inset 0 1px 0 rgba(255,255,255,0.05);
     }
-    .terminal-header {
-      background: #1B1830;
-      border-bottom: 1px solid #2D2A4A;
+    .light .terminal { box-shadow: 0 24px 80px -12px rgba(124, 58, 237, 0.25); }
+    .terminal-header { background: #1B1830; border-bottom: 1px solid #2D2A4A; }
+
+    /* 5분할 미니 (모바일 친화적) */
+    .pane-mini {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 8px;
+      padding: 12px;
+      background: #0F0E1A;
+      border: 1px solid #2D2A4A;
+      border-radius: 14px;
+      box-shadow: 0 24px 80px -12px rgba(124, 58, 237, 0.5);
     }
-    .pane-leader { color: #FBBF24; }
-    .pane-planner { color: #FDE047; }
-    .pane-frontend { color: #4ADE80; }
-    .pane-backend { color: #38BDF8; }
-    .pane-qa { color: #F87171; }
+    .pane-mini > .leader {
+      background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(251, 191, 36, 0.05));
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 240px;
+    }
+    .pane-mini > .right { display: grid; gap: 8px; }
+    .pane-mini > .right > div {
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .pane-planner-bg { background: linear-gradient(135deg, rgba(253,224,71,0.18), rgba(253,224,71,0.06)); border: 1px solid rgba(253,224,71,0.4); color: #FDE047; }
+    .pane-frontend-bg { background: linear-gradient(135deg, rgba(74,222,128,0.18), rgba(74,222,128,0.06)); border: 1px solid rgba(74,222,128,0.4); color: #4ADE80; }
+    .pane-backend-bg { background: linear-gradient(135deg, rgba(56,189,248,0.18), rgba(56,189,248,0.06)); border: 1px solid rgba(56,189,248,0.4); color: #38BDF8; }
+    .pane-qa-bg { background: linear-gradient(135deg, rgba(248,113,113,0.18), rgba(248,113,113,0.06)); border: 1px solid rgba(248,113,113,0.4); color: #F87171; }
+
+    /* CTA 버튼 강화 */
+    .btn-primary {
+      background: linear-gradient(135deg, #7C3AED, #4F46E5);
+      transition: transform .2s, box-shadow .2s;
+      box-shadow: 0 8px 24px -4px rgba(124, 58, 237, 0.5);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 16px 32px -6px rgba(124, 58, 237, 0.65);
+    }
+    .btn-primary:active { transform: translateY(0) scale(0.98); }
+
+    /* 스크롤 진입 애니메이션 */
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity .8s ease-out, transform .8s ease-out; }
+    .reveal.in { opacity: 1; transform: translateY(0); }
+    @media (prefers-reduced-motion: reduce) {
+      .reveal, .card, .btn-primary { transition: none !important; animation: none !important; }
+      .reveal { opacity: 1; transform: none; }
+    }
+
+    /* Sticky 플로팅 CTA */
+    .floating-cta {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 40;
+      transform: translateY(120px);
+      transition: transform .3s cubic-bezier(.4,0,.2,1);
+    }
+    .floating-cta.show { transform: translateY(0); }
+
+    /* details 요소 (FAQ) */
+    details summary { list-style: none; }
+    details summary::-webkit-details-marker { display: none; }
+    details[open] summary .chevron { transform: rotate(180deg); }
+    .chevron { transition: transform .25s; }
+
+    /* 큰 숫자 강조 */
+    .big-num {
+      font-size: 1.4em;
+      font-weight: 800;
+      background: linear-gradient(135deg, #A78BFA, #7C3AED);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      padding: 0 4px;
+    }
+
+    /* skip link (a11y) */
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: 0;
+    }
+    .skip-link:focus {
+      left: 8px;
+      top: 8px;
+      z-index: 100;
+      padding: 10px 16px;
+      background: #7C3AED;
+      color: white;
+      border-radius: 8px;
+    }
   </style>
 </head>
-<body class="bg-mintorain-ink text-slate-100 antialiased">
+<body class="antialiased font-sans">
+
+  <!-- Skip to content (a11y) -->
+  <a href="#main" class="skip-link">본문으로 바로 가기</a>
 
   <!-- ─────────────── Nav ─────────────── -->
-  <nav class="fixed top-0 inset-x-0 z-50 backdrop-blur bg-mintorain-ink/70 border-b border-mintorain-700/30">
+  <nav class="fixed top-0 inset-x-0 z-50 backdrop-blur-md border-b" style="background: color-mix(in srgb, var(--bg-primary) 70%, transparent); border-color: var(--border);" aria-label="주 내비게이션">
     <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-      <a href="#" class="flex items-center gap-2 font-bold text-lg">
-        <span class="text-2xl">🐙</span>
+      <a href="#" class="flex items-center gap-2 font-bold text-lg" aria-label="홈으로">
+        <span aria-hidden="true" class="text-2xl">🐙</span>
         <span class="gradient-text">MINTORAIN Tmux Ocastra</span>
       </a>
-      <div class="hidden md:flex items-center gap-8 text-sm text-slate-300">
-        <a href="#features" class="hover:text-white">기능</a>
-        <a href="#quickstart" class="hover:text-white">시작하기</a>
-        <a href="#stack" class="hover:text-white">기술스택</a>
-        <a href="#faq" class="hover:text-white">FAQ</a>
+      <div class="hidden md:flex items-center gap-7 text-sm text-secondary">
+        <a href="#features" class="hover:text-mintorain-300 transition">기능</a>
+        <a href="#quickstart" class="hover:text-mintorain-300 transition">시작하기</a>
+        <a href="#stack" class="hover:text-mintorain-300 transition">기술스택</a>
+        <a href="#faq" class="hover:text-mintorain-300 transition">FAQ</a>
       </div>
-      <a href="https://github.com/mintorain/mintorain-tmux-ocastra"
-         class="px-4 py-2 rounded-lg bg-mintorain-600 hover:bg-mintorain-500 transition text-sm font-semibold">
-        ⭐ GitHub
-      </a>
+      <div class="flex items-center gap-3">
+        <button id="theme-toggle" type="button"
+                class="w-9 h-9 rounded-lg border flex items-center justify-center hover:scale-105 transition"
+                style="background: var(--bg-card); border-color: var(--border);"
+                aria-label="라이트/다크 모드 전환">
+          <span aria-hidden="true" id="theme-icon">🌙</span>
+        </button>
+        <a href="https://github.com/mintorain/mintorain-tmux-ocastra"
+           class="px-4 py-2 rounded-lg btn-primary text-sm font-semibold text-white">
+          <span aria-hidden="true">⭐</span> GitHub
+        </a>
+      </div>
     </div>
   </nav>
 
-  <!-- ─────────────── Hero ─────────────── -->
-  <section class="relative pt-32 pb-20 grid-bg overflow-hidden">
-    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-mintorain-ink"></div>
-    <div class="relative max-w-6xl mx-auto px-6 text-center">
-      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-mintorain-700/30 border border-mintorain-500/40 text-mintorain-100 text-sm mb-8">
-        <span>🚀</span>
-        <span>두온교육 바이브코딩 교육센터(by mintorain)</span>
-      </div>
+  <main id="main">
 
-      <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.1] mb-6">
-        <span class="text-white">5개의</span>
-        <span class="gradient-text">Claude</span>
-        <span class="text-white">를,</span><br />
-        <span class="text-white">한 화면에서,</span>
-        <span class="gradient-text">동시에</span>
-      </h1>
-
-      <p class="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto mb-10 leading-relaxed">
-        터미널 한 번 띄우면 <strong class="text-white">기획자 · 프론트엔드 · 백엔드 · QA · 리더</strong>가 자동 소환되는<br />
-        Claude Code 팀 에이전트 키트. <strong class="text-white">macOS / Linux / Windows 네이티브</strong> 모두 지원.
-      </p>
-
-      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-        <a href="#quickstart"
-           class="px-8 py-4 rounded-xl bg-gradient-to-r from-mintorain-600 to-indigo-600 hover:from-mintorain-500 hover:to-indigo-500 transition font-semibold text-white shadow-lg shadow-mintorain-700/30">
-          🚀 5분 만에 시작하기
-        </a>
-        <a href="https://github.com/mintorain/mintorain-tmux-ocastra"
-           class="px-8 py-4 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 transition font-semibold text-white">
-          ⭐ GitHub Star
-        </a>
-      </div>
-
-      <!-- 5분할 ASCII 데모 -->
-      <div class="terminal max-w-4xl mx-auto text-left font-mono text-sm">
-        <div class="terminal-header flex items-center gap-2 px-4 py-2.5">
-          <span class="w-3 h-3 rounded-full bg-red-500"></span>
-          <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
-          <span class="w-3 h-3 rounded-full bg-green-500"></span>
-          <span class="ml-3 text-slate-400 text-xs">mintorain-team — Zellij / tmux</span>
+    <!-- ─────────────── Hero ─────────────── -->
+    <section class="relative pt-32 pb-20 grid-bg overflow-hidden">
+      <div class="relative max-w-6xl mx-auto px-6 text-center">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm mb-8 reveal"
+             style="background: rgba(124, 58, 237, 0.15); border: 1px solid rgba(167, 139, 250, 0.4); color: var(--accent);">
+          <span aria-hidden="true">🚀</span>
+          <span>두온교육 바이브코딩 교육센터(by mintorain)</span>
         </div>
-        <pre class="p-6 text-xs md:text-sm leading-relaxed overflow-x-auto"><code><span class="text-slate-500">┌──────────────────────┬─────────────────────┐</span>
-<span class="text-slate-500">│</span> <span class="pane-leader">👑 Leader</span>            <span class="text-slate-500">│</span> <span class="pane-planner">📋 Planner</span>          <span class="text-slate-500">│</span>
-<span class="text-slate-500">│</span> 사용자 메인 대화      <span class="text-slate-500">├─────────────────────┤</span>
-<span class="text-slate-500">│</span> 작업 흐름 조율        <span class="text-slate-500">│</span> <span class="pane-frontend">🎨 Frontend</span>         <span class="text-slate-500">│</span>
+
+        <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.05] mb-6 reveal" style="transition-delay: .1s;">
+          <span class="big-num" style="font-size: 1em;">5개의</span>
+          <span class="gradient-text">Claude</span>
+          <span>를,</span><br />
+          <span>한 화면에서,</span>
+          <span class="gradient-text">동시에</span>
+        </h1>
+
+        <p class="text-lg md:text-xl text-secondary max-w-2xl mx-auto mb-10 leading-relaxed reveal" style="transition-delay: .2s;">
+          기획자 · 프론트엔드 · 백엔드 · QA · 리더가 <strong>한 번의 명령</strong>으로 자동 소환되는<br class="hidden sm:inline" />
+          Claude Code 팀 에이전트 키트
+        </p>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14 reveal" style="transition-delay: .3s;">
+          <a href="#quickstart"
+             class="w-full sm:w-auto px-8 py-4 rounded-xl btn-primary font-semibold text-white text-center">
+            <span aria-hidden="true">🚀</span> 5분 만에 시작하기
+          </a>
+          <a href="https://github.com/mintorain/mintorain-tmux-ocastra"
+             class="w-full sm:w-auto px-8 py-4 rounded-xl border font-semibold transition hover:scale-105"
+             style="background: var(--bg-card); border-color: var(--border); color: var(--text-primary);">
+            <img src="https://img.shields.io/github/stars/mintorain/mintorain-tmux-ocastra?style=flat-square&label=Star&color=8B5CF6&logo=github&logoColor=white" alt="GitHub Stars" class="inline-block align-middle h-5" />
+          </a>
+        </div>
+
+        <!-- 신뢰 배지 -->
+        <ul class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted reveal" style="transition-delay: .4s;" role="list">
+          <li><span aria-hidden="true">📦</span> MIT License</li>
+          <li><span aria-hidden="true">🍎</span> macOS</li>
+          <li><span aria-hidden="true">🐧</span> Linux</li>
+          <li><span aria-hidden="true">🪟</span> Windows Native</li>
+          <li><span aria-hidden="true">🇰🇷</span> 한국어 우선</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ─────────────── 데모 (5분할 미리보기) ─────────────── -->
+    <section class="pb-24" aria-label="5분할 레이아웃 미리보기">
+      <div class="max-w-5xl mx-auto px-6 reveal">
+        <!-- 데스크톱: ASCII 터미널 -->
+        <div class="hidden md:block terminal text-left font-mono text-sm">
+          <div class="terminal-header flex items-center gap-2 px-4 py-2.5">
+            <span class="w-3 h-3 rounded-full bg-red-500" aria-hidden="true"></span>
+            <span class="w-3 h-3 rounded-full bg-yellow-500" aria-hidden="true"></span>
+            <span class="w-3 h-3 rounded-full bg-green-500" aria-hidden="true"></span>
+            <span class="ml-3 text-slate-400 text-xs">mintorain-team — Zellij / tmux</span>
+          </div>
+          <pre role="img" aria-label="좌측 리더, 우측 4분할 (기획자/프론트엔드/백엔드/QA) 5분할 터미널 레이아웃" class="p-6 text-xs md:text-sm leading-relaxed overflow-x-auto"><code><span class="text-slate-500">┌──────────────────────┬─────────────────────┐</span>
+<span class="text-slate-500">│</span> <span style="color:#FBBF24">👑 Leader</span>            <span class="text-slate-500">│</span> <span style="color:#FDE047">📋 Planner</span>          <span class="text-slate-500">│</span>
+<span class="text-slate-500">│</span> <span class="text-slate-300">사용자 메인 대화</span>      <span class="text-slate-500">├─────────────────────┤</span>
+<span class="text-slate-500">│</span> <span class="text-slate-300">작업 흐름 조율</span>        <span class="text-slate-500">│</span> <span style="color:#4ADE80">🎨 Frontend</span>         <span class="text-slate-500">│</span>
 <span class="text-slate-500">│</span>                      <span class="text-slate-500">├─────────────────────┤</span>
-<span class="text-slate-500">│</span> <span class="text-slate-300">$ </span><span class="text-green-400">claude</span>             <span class="text-slate-500">│</span> <span class="pane-backend">⚙️  Backend</span>         <span class="text-slate-500">│</span>
-<span class="text-slate-500">│</span> <span class="text-slate-300">&gt;</span> <span class="text-mintorain-100">기획자에게 시켜줘</span>  <span class="text-slate-500">├─────────────────────┤</span>
-<span class="text-slate-500">│</span>                      <span class="text-slate-500">│</span> <span class="pane-qa">🔍 QA</span>               <span class="text-slate-500">│</span>
+<span class="text-slate-500">│</span> <span class="text-slate-300">$ </span><span class="text-green-400">claude</span>             <span class="text-slate-500">│</span> <span style="color:#38BDF8">⚙️  Backend</span>         <span class="text-slate-500">│</span>
+<span class="text-slate-500">│</span> <span class="text-slate-300">&gt;</span> <span style="color:#C4B5FD">기획자에게 시켜줘</span>  <span class="text-slate-500">├─────────────────────┤</span>
+<span class="text-slate-500">│</span>                      <span class="text-slate-500">│</span> <span style="color:#F87171">🔍 QA</span>               <span class="text-slate-500">│</span>
 <span class="text-slate-500">└──────────────────────┴─────────────────────┘</span>
 
 <span class="text-slate-400"># 각 패인은 시작 시점부터 다른 역할을 가집니다 (--append-system-prompt)</span></code></pre>
-      </div>
+        </div>
 
-      <!-- 신뢰 배지 -->
-      <div class="mt-10 flex flex-wrap items-center justify-center gap-6 text-sm text-slate-400">
-        <span>📦 MIT License</span>
-        <span>🍎 macOS</span>
-        <span>🐧 Linux</span>
-        <span>🪟 Windows Native</span>
-        <span>🇰🇷 한국어 우선</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- ─────────────── Problem ─────────────── -->
-  <section class="py-24 border-t border-mintorain-700/30">
-    <div class="max-w-5xl mx-auto px-6">
-      <div class="text-center mb-16">
-        <p class="text-mintorain-300 text-sm font-semibold uppercase tracking-wider mb-3">이런 고민, 있으셨죠?</p>
-        <h2 class="text-3xl md:text-5xl font-bold">AI 코딩 보조, <span class="gradient-text">한 명으로는 부족합니다</span></h2>
-      </div>
-
-      <div class="grid md:grid-cols-3 gap-6">
-        <div class="card p-8 rounded-2xl bg-white/5 border border-white/10">
-          <div class="text-4xl mb-4">🤖</div>
-          <h3 class="text-lg font-bold mb-2 text-white">한 명만 일을 해요</h3>
-          <p class="text-slate-300 text-sm leading-relaxed">기획·구현·검수를 같은 컨텍스트가 모두 처리. 역할 분리가 안 돼서 검토자가 작성자 시각에 갇힘.</p>
-        </div>
-        <div class="card p-8 rounded-2xl bg-white/5 border border-white/10">
-          <div class="text-4xl mb-4">🪟</div>
-          <h3 class="text-lg font-bold mb-2 text-white">Windows에서 tmux가 안 돼요</h3>
-          <p class="text-slate-300 text-sm leading-relaxed">WSL2 설치, Ubuntu 깔기, 환경변수 분리... 시작도 전에 지칩니다.</p>
-        </div>
-        <div class="card p-8 rounded-2xl bg-white/5 border border-white/10">
-          <div class="text-4xl mb-4">🔐</div>
-          <h3 class="text-lg font-bold mb-2 text-white">매번 권한 다이얼로그</h3>
-          <p class="text-slate-300 text-sm leading-relaxed">"Yes, I trust this folder", "Allow Bash"... 작업 흐름이 끊깁니다.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ─────────────── Solution / Features ─────────────── -->
-  <section id="features" class="py-24 border-t border-mintorain-700/30 bg-gradient-to-b from-transparent to-mintorain-900/20">
-    <div class="max-w-6xl mx-auto px-6">
-      <div class="text-center mb-16">
-        <p class="text-mintorain-300 text-sm font-semibold uppercase tracking-wider mb-3">Solution</p>
-        <h2 class="text-3xl md:text-5xl font-bold mb-4">한 번의 명령으로 <span class="gradient-text">완성된 팀</span></h2>
-        <p class="text-slate-300 max-w-2xl mx-auto">설치 ~5분 / 실행 ~10초. 그 다음부터는 일만 하면 됩니다.</p>
-      </div>
-
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- F1 -->
-        <div class="card p-8 rounded-2xl bg-gradient-to-br from-mintorain-700/30 to-transparent border border-mintorain-500/30">
-          <div class="text-3xl mb-4">🪟</div>
-          <h3 class="text-xl font-bold mb-2 text-white">tmux 5분할 자동 세팅</h3>
-          <p class="text-slate-300 text-sm leading-relaxed">macOS / Linux / WSL2 — 패인 색상, 이름, 크기까지 한 번에. tmuxp YAML 또는 순수 tmux 스크립트 둘 다 제공.</p>
-        </div>
-        <!-- F2 -->
-        <div class="card p-8 rounded-2xl bg-gradient-to-br from-mintorain-700/30 to-transparent border border-mintorain-500/30">
-          <div class="text-3xl mb-4">⚡</div>
-          <h3 class="text-xl font-bold mb-2 text-white">Zellij Windows 네이티브</h3>
-          <p class="text-slate-300 text-sm leading-relaxed">WSL2 없이 Windows 11 PowerShell만으로. <code class="px-1.5 py-0.5 rounded bg-black/40 text-xs">winget install</code> 두 줄이면 끝.</p>
-        </div>
-        <!-- F3 -->
-        <div class="card p-8 rounded-2xl bg-gradient-to-br from-mintorain-700/30 to-transparent border border-mintorain-500/30">
-          <div class="text-3xl mb-4">🎭</div>
-          <h3 class="text-xl font-bold mb-2 text-white">역할별 자동 부여</h3>
-          <p class="text-slate-300 text-sm leading-relaxed">5개 패인이 시작 시점부터 다른 system prompt로 동작. Leader / Planner / Frontend / Backend / QA.</p>
-        </div>
-        <!-- F4 -->
-        <div class="card p-8 rounded-2xl bg-gradient-to-br from-mintorain-700/30 to-transparent border border-mintorain-500/30">
-          <div class="text-3xl mb-4">🛡️</div>
-          <h3 class="text-xl font-bold mb-2 text-white">보안 훅 자동 적용</h3>
-          <p class="text-slate-300 text-sm leading-relaxed">API 키 하드코딩 차단, console.log 경고, 시크릿 노출 방지. <code class="px-1.5 py-0.5 rounded bg-black/40 text-xs">.claude/hooks.json</code> 으로 관리.</p>
-        </div>
-        <!-- F5 -->
-        <div class="card p-8 rounded-2xl bg-gradient-to-br from-mintorain-700/30 to-transparent border border-mintorain-500/30">
-          <div class="text-3xl mb-4">📚</div>
-          <h3 class="text-xl font-bold mb-2 text-white">10개 도메인 스킬</h3>
-          <p class="text-slate-300 text-sm leading-relaxed">랜딩페이지 · 퍼널 · n8n · 카카오톡 · Supabase · Next.js · 이메일 · 콘텐츠 변환 · 쇼츠 · MCP 설정.</p>
-        </div>
-        <!-- F6 -->
-        <div class="card p-8 rounded-2xl bg-gradient-to-br from-mintorain-700/30 to-transparent border border-mintorain-500/30">
-          <div class="text-3xl mb-4">🇰🇷</div>
-          <h3 class="text-xl font-bold mb-2 text-white">한국 시장 특화</h3>
-          <p class="text-slate-300 text-sm leading-relaxed">네이버 SEO, 카카오톡 알림톡, Solapi, 모바일 퍼스트, 한국어 주석 — 비전공자도 바로 이해.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ─────────────── Quick Start ─────────────── -->
-  <section id="quickstart" class="py-24 border-t border-mintorain-700/30">
-    <div class="max-w-5xl mx-auto px-6">
-      <div class="text-center mb-16">
-        <p class="text-mintorain-300 text-sm font-semibold uppercase tracking-wider mb-3">Quick Start</p>
-        <h2 class="text-3xl md:text-5xl font-bold mb-4">5분 만에 <span class="gradient-text">5명의 팀</span></h2>
-      </div>
-
-      <div class="space-y-8">
-        <!-- Step 1 -->
-        <div class="rounded-2xl bg-white/5 border border-white/10 p-8">
-          <div class="flex items-start gap-4 mb-4">
-            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-mintorain-500 to-indigo-500 flex items-center justify-center font-bold">1</div>
-            <div class="flex-1">
-              <h3 class="text-xl font-bold text-white mb-2">사전 도구 설치</h3>
-              <p class="text-slate-300 text-sm">OS에 맞춰 한 줄씩.</p>
+        <!-- 모바일: 컬러 박스 5분할 -->
+        <div class="md:hidden pane-mini" role="img" aria-label="5분할 팀 에이전트 레이아웃">
+          <div class="leader">
+            <div>
+              <div style="color:#FBBF24" class="font-bold text-sm mb-2"><span aria-hidden="true">👑</span> Leader</div>
+              <div class="text-xs text-slate-300">사용자 메인 대화 / 작업 흐름 조율</div>
+            </div>
+            <div class="text-[10px] text-slate-400 font-mono">
+              <span class="text-slate-300">$</span> <span class="text-green-400">claude</span><br />
+              <span class="text-slate-300">&gt;</span> <span class="text-mintorain-300">기획자에게 시켜줘</span>
             </div>
           </div>
+          <div class="right">
+            <div class="pane-planner-bg"><span aria-hidden="true">📋</span> Planner</div>
+            <div class="pane-frontend-bg"><span aria-hidden="true">🎨</span> Frontend</div>
+            <div class="pane-backend-bg"><span aria-hidden="true">⚙️</span> Backend</div>
+            <div class="pane-qa-bg"><span aria-hidden="true">🔍</span> QA</div>
+          </div>
+        </div>
 
-          <div class="grid md:grid-cols-3 gap-4 ml-14">
-            <div class="bg-black/40 rounded-lg p-4 border border-white/5">
-              <div class="text-xs text-slate-400 mb-2">🍎 macOS</div>
-              <pre class="text-xs text-slate-200 font-mono whitespace-pre-wrap">brew install tmux tmuxp
-npm i -g @anthropic-ai/claude-code</pre>
+        <p class="text-center text-xs text-muted mt-4">
+          <span aria-hidden="true">🎬</span> 실시간 데모 영상은 곧 공개 예정 — 먼저 직접 실행해보세요
+        </p>
+      </div>
+    </section>
+
+    <!-- ─────────────── Problem ─────────────── -->
+    <section class="py-24 border-t" style="border-color: var(--border);">
+      <div class="max-w-5xl mx-auto px-6">
+        <div class="text-center mb-16 reveal">
+          <p class="text-mintorain-400 text-sm font-semibold uppercase tracking-widest mb-3">이런 고민, 있으셨죠?</p>
+          <h2 class="text-3xl md:text-5xl font-bold leading-tight">AI 코딩 보조,<br /><span class="gradient-text">한 명으로는 부족합니다</span></h2>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6">
+          <article class="card p-8 rounded-2xl border bg-card reveal" style="transition-delay: .1s;">
+            <div class="text-4xl mb-4" aria-hidden="true">🤖</div>
+            <h3 class="text-lg font-bold mb-2">한 명만 일을 해요</h3>
+            <p class="text-secondary text-sm leading-relaxed">기획·구현·검수가 같은 컨텍스트로 처리되어 검토자가 작성자 시각에 갇힙니다.</p>
+          </article>
+          <article class="card p-8 rounded-2xl border bg-card reveal" style="transition-delay: .2s;">
+            <div class="text-4xl mb-4" aria-hidden="true">🪟</div>
+            <h3 class="text-lg font-bold mb-2">Windows에서 tmux가 안 돼요</h3>
+            <p class="text-secondary text-sm leading-relaxed">WSL2 설치, Ubuntu 깔기, 환경변수 분리... 시작도 전에 지칩니다.</p>
+          </article>
+          <article class="card p-8 rounded-2xl border bg-card reveal" style="transition-delay: .3s;">
+            <div class="text-4xl mb-4" aria-hidden="true">🔐</div>
+            <h3 class="text-lg font-bold mb-2">매번 권한 다이얼로그</h3>
+            <p class="text-secondary text-sm leading-relaxed">"Yes, I trust this folder", "Allow Bash"... 작업 흐름이 끊깁니다.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────────── Features ─────────────── -->
+    <section id="features" class="py-24 border-t" style="border-color: var(--border);">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="text-center mb-16 reveal">
+          <p class="text-mintorain-400 text-sm font-semibold uppercase tracking-widest mb-3">Solution</p>
+          <h2 class="text-3xl md:text-5xl font-bold mb-4">한 번의 명령으로<br /><span class="gradient-text">완성된 팀</span></h2>
+          <p class="text-secondary max-w-2xl mx-auto">설치 <span class="big-num">5분</span> · 실행 <span class="big-num">10초</span>. 그 다음부터는 일만 하면 됩니다.</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <article class="card p-8 rounded-2xl border bg-card reveal" style="transition-delay: .05s;">
+            <div class="text-3xl mb-4" aria-hidden="true">🪟</div>
+            <h3 class="text-xl font-bold mb-2">tmux 5분할 자동 세팅</h3>
+            <p class="text-secondary text-sm leading-relaxed">macOS / Linux / WSL2 — 패인 색상, 이름, 크기까지 한 번에. tmuxp YAML 또는 순수 tmux 스크립트 둘 다 제공.</p>
+          </article>
+          <article class="card p-8 rounded-2xl border bg-card reveal" style="transition-delay: .1s;">
+            <div class="text-3xl mb-4" aria-hidden="true">⚡</div>
+            <h3 class="text-xl font-bold mb-2">Zellij Windows 네이티브</h3>
+            <p class="text-secondary text-sm leading-relaxed">WSL2 없이 Windows 11 PowerShell만으로. <code class="px-1.5 py-0.5 rounded bg-black/40 text-xs font-mono">winget install</code> 두 줄이면 끝.</p>
+          </article>
+          <article class="card p-8 rounded-2xl border bg-card reveal" style="transition-delay: .15s;">
+            <div class="text-3xl mb-4" aria-hidden="true">🎭</div>
+            <h3 class="text-xl font-bold mb-2">역할별 자동 부여</h3>
+            <p class="text-secondary text-sm leading-relaxed"><span class="big-num">5개</span>패인이 시작 시점부터 다른 system prompt로 동작. Leader / Planner / Frontend / Backend / QA.</p>
+          </article>
+          <article class="card p-8 rounded-2xl border bg-card reveal" style="transition-delay: .2s;">
+            <div class="text-3xl mb-4" aria-hidden="true">🛡️</div>
+            <h3 class="text-xl font-bold mb-2">보안 훅 자동 적용</h3>
+            <p class="text-secondary text-sm leading-relaxed">API 키 하드코딩 차단, console.log 경고, 시크릿 노출 방지. <code class="px-1.5 py-0.5 rounded bg-black/40 text-xs font-mono">.claude/hooks.json</code></p>
+          </article>
+          <article class="card p-8 rounded-2xl border bg-card reveal" style="transition-delay: .25s;">
+            <div class="text-3xl mb-4" aria-hidden="true">📚</div>
+            <h3 class="text-xl font-bold mb-2"><span class="big-num">10개</span>도메인 스킬</h3>
+            <p class="text-secondary text-sm leading-relaxed">랜딩페이지 · 퍼널 · n8n · 카카오톡 · Supabase · Next.js · 이메일 · 콘텐츠 변환 · 쇼츠 · MCP 설정.</p>
+          </article>
+          <article class="card p-8 rounded-2xl border bg-card reveal" style="transition-delay: .3s;">
+            <div class="text-3xl mb-4" aria-hidden="true">🇰🇷</div>
+            <h3 class="text-xl font-bold mb-2">한국 시장 특화</h3>
+            <p class="text-secondary text-sm leading-relaxed">네이버 SEO, 카카오톡 알림톡, Solapi, 모바일 퍼스트, 한국어 주석 — 비전공자도 바로 이해.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────────── Quick Start ─────────────── -->
+    <section id="quickstart" class="py-24 border-t" style="border-color: var(--border);">
+      <div class="max-w-5xl mx-auto px-6">
+        <div class="text-center mb-16 reveal">
+          <p class="text-mintorain-400 text-sm font-semibold uppercase tracking-widest mb-3">Quick Start</p>
+          <h2 class="text-3xl md:text-5xl font-bold"><span class="big-num">5분</span>만에 <span class="gradient-text">5명의 팀</span></h2>
+        </div>
+
+        <ol class="space-y-8" role="list">
+          <li class="rounded-2xl border bg-card p-6 md:p-8 reveal">
+            <div class="flex items-start gap-4 mb-4">
+              <div class="flex-shrink-0 w-10 h-10 rounded-full btn-primary text-white flex items-center justify-center font-bold" aria-hidden="true">1</div>
+              <div class="flex-1">
+                <h3 class="text-xl font-bold mb-1">사전 도구 설치</h3>
+                <p class="text-secondary text-sm">OS에 맞춰 한 줄씩.</p>
+              </div>
             </div>
-            <div class="bg-black/40 rounded-lg p-4 border border-white/5">
-              <div class="text-xs text-slate-400 mb-2">🐧 Linux</div>
-              <pre class="text-xs text-slate-200 font-mono whitespace-pre-wrap">sudo apt install -y tmux python3-pip
+            <div class="grid md:grid-cols-3 gap-3 md:ml-14">
+              <div class="bg-black/40 rounded-lg p-4 border border-white/5">
+                <div class="text-xs text-mintorain-300 font-semibold mb-2"><span aria-hidden="true">🍎</span> macOS</div>
+                <pre class="text-xs text-slate-100 font-mono whitespace-pre-wrap leading-relaxed">brew install tmux tmuxp
+npm i -g @anthropic-ai/claude-code</pre>
+              </div>
+              <div class="bg-black/40 rounded-lg p-4 border border-white/5">
+                <div class="text-xs text-mintorain-300 font-semibold mb-2"><span aria-hidden="true">🐧</span> Linux</div>
+                <pre class="text-xs text-slate-100 font-mono whitespace-pre-wrap leading-relaxed">sudo apt install tmux python3-pip
 pip3 install --user tmuxp
 npm i -g @anthropic-ai/claude-code</pre>
-            </div>
-            <div class="bg-black/40 rounded-lg p-4 border border-white/5">
-              <div class="text-xs text-slate-400 mb-2">🪟 Windows (WSL 불필요)</div>
-              <pre class="text-xs text-slate-200 font-mono whitespace-pre-wrap">winget install arndawg.zellij-windows
+              </div>
+              <div class="bg-black/40 rounded-lg p-4 border border-white/5">
+                <div class="text-xs text-mintorain-300 font-semibold mb-2"><span aria-hidden="true">🪟</span> Windows (WSL 불필요)</div>
+                <pre class="text-xs text-slate-100 font-mono whitespace-pre-wrap leading-relaxed">winget install arndawg.zellij-windows
 winget install Microsoft.PowerShell
 npm i -g @anthropic-ai/claude-code</pre>
+              </div>
             </div>
-          </div>
-        </div>
+          </li>
 
-        <!-- Step 2 -->
-        <div class="rounded-2xl bg-white/5 border border-white/10 p-8">
-          <div class="flex items-start gap-4 mb-4">
-            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-mintorain-500 to-indigo-500 flex items-center justify-center font-bold">2</div>
-            <div class="flex-1">
-              <h3 class="text-xl font-bold text-white mb-2">키트 클론</h3>
+          <li class="rounded-2xl border bg-card p-6 md:p-8 reveal" style="transition-delay: .1s;">
+            <div class="flex items-start gap-4 mb-4">
+              <div class="flex-shrink-0 w-10 h-10 rounded-full btn-primary text-white flex items-center justify-center font-bold" aria-hidden="true">2</div>
+              <div class="flex-1">
+                <h3 class="text-xl font-bold mb-1">키트 클론</h3>
+              </div>
             </div>
-          </div>
-          <div class="ml-14 bg-black/40 rounded-lg p-4 border border-white/5">
-            <pre class="text-xs md:text-sm text-slate-200 font-mono whitespace-pre-wrap">git clone https://github.com/mintorain/mintorain-tmux-ocastra
+            <div class="md:ml-14 bg-black/40 rounded-lg p-4 border border-white/5">
+              <pre class="text-xs md:text-sm text-slate-100 font-mono whitespace-pre-wrap leading-relaxed">git clone https://github.com/mintorain/mintorain-tmux-ocastra
 cd mintorain-tmux-ocastra/mintorain-tmux-ocastra-main</pre>
-          </div>
-        </div>
-
-        <!-- Step 3 -->
-        <div class="rounded-2xl bg-white/5 border border-white/10 p-8">
-          <div class="flex items-start gap-4 mb-4">
-            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-mintorain-500 to-indigo-500 flex items-center justify-center font-bold">3</div>
-            <div class="flex-1">
-              <h3 class="text-xl font-bold text-white mb-2">실행</h3>
-              <p class="text-slate-300 text-sm">OS 별 한 줄 실행 → 5분할 자동 등장.</p>
             </div>
-          </div>
-          <div class="ml-14 grid md:grid-cols-3 gap-4">
-            <div class="bg-black/40 rounded-lg p-4 border border-white/5">
-              <div class="text-xs text-slate-400 mb-2">🍎 macOS</div>
-              <pre class="text-xs text-slate-200 font-mono">./mintorain-team.command</pre>
+          </li>
+
+          <li class="rounded-2xl border bg-card p-6 md:p-8 reveal" style="transition-delay: .2s;">
+            <div class="flex items-start gap-4 mb-4">
+              <div class="flex-shrink-0 w-10 h-10 rounded-full btn-primary text-white flex items-center justify-center font-bold" aria-hidden="true">3</div>
+              <div class="flex-1">
+                <h3 class="text-xl font-bold mb-1">실행 → <span class="big-num">10초</span> 안에 5분할 등장</h3>
+              </div>
             </div>
-            <div class="bg-black/40 rounded-lg p-4 border border-white/5">
-              <div class="text-xs text-slate-400 mb-2">🐧 Linux / WSL2</div>
-              <pre class="text-xs text-slate-200 font-mono">bash ./mintorain-tmuxp.sh</pre>
+            <div class="md:ml-14 grid md:grid-cols-3 gap-3">
+              <div class="bg-black/40 rounded-lg p-4 border border-white/5">
+                <div class="text-xs text-mintorain-300 font-semibold mb-2"><span aria-hidden="true">🍎</span> macOS</div>
+                <pre class="text-xs text-slate-100 font-mono">./mintorain-team.command</pre>
+              </div>
+              <div class="bg-black/40 rounded-lg p-4 border border-white/5">
+                <div class="text-xs text-mintorain-300 font-semibold mb-2"><span aria-hidden="true">🐧</span> Linux / WSL2</div>
+                <pre class="text-xs text-slate-100 font-mono">bash ./mintorain-tmuxp.sh</pre>
+              </div>
+              <div class="bg-black/40 rounded-lg p-4 border border-white/5">
+                <div class="text-xs text-mintorain-300 font-semibold mb-2"><span aria-hidden="true">🪟</span> Windows</div>
+                <pre class="text-xs text-slate-100 font-mono">pwsh ./mintorain-team.ps1</pre>
+              </div>
             </div>
-            <div class="bg-black/40 rounded-lg p-4 border border-white/5">
-              <div class="text-xs text-slate-400 mb-2">🪟 Windows</div>
-              <pre class="text-xs text-slate-200 font-mono">pwsh ./mintorain-team.ps1</pre>
-            </div>
-          </div>
-        </div>
+          </li>
+        </ol>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ─────────────── Stack ─────────────── -->
-  <section id="stack" class="py-24 border-t border-mintorain-700/30">
-    <div class="max-w-5xl mx-auto px-6">
-      <div class="text-center mb-16">
-        <p class="text-mintorain-300 text-sm font-semibold uppercase tracking-wider mb-3">기술 스택</p>
-        <h2 class="text-3xl md:text-5xl font-bold">검증된 <span class="gradient-text">한국 시장 도구</span>로 구성</h2>
-      </div>
+    <!-- ─────────────── Stack ─────────────── -->
+    <section id="stack" class="py-24 border-t" style="border-color: var(--border);">
+      <div class="max-w-5xl mx-auto px-6">
+        <div class="text-center mb-16 reveal">
+          <p class="text-mintorain-400 text-sm font-semibold uppercase tracking-widest mb-3">기술 스택</p>
+          <h2 class="text-3xl md:text-5xl font-bold">검증된 <span class="gradient-text">한국 시장 도구</span>로 구성</h2>
+        </div>
 
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="p-6 rounded-xl bg-white/5 border border-white/10 text-center">
-          <div class="text-2xl mb-2">⚡</div>
-          <div class="font-semibold">Next.js 15</div>
-          <div class="text-xs text-slate-400 mt-1">App Router</div>
-        </div>
-        <div class="p-6 rounded-xl bg-white/5 border border-white/10 text-center">
-          <div class="text-2xl mb-2">🗄️</div>
-          <div class="font-semibold">Supabase</div>
-          <div class="text-xs text-slate-400 mt-1">Auth + DB + RLS</div>
-        </div>
-        <div class="p-6 rounded-xl bg-white/5 border border-white/10 text-center">
-          <div class="text-2xl mb-2">🔄</div>
-          <div class="font-semibold">n8n</div>
-          <div class="text-xs text-slate-400 mt-1">자동화 워크플로</div>
-        </div>
-        <div class="p-6 rounded-xl bg-white/5 border border-white/10 text-center">
-          <div class="text-2xl mb-2">💬</div>
-          <div class="font-semibold">Solapi</div>
-          <div class="text-xs text-slate-400 mt-1">카카오 알림톡</div>
-        </div>
-        <div class="p-6 rounded-xl bg-white/5 border border-white/10 text-center">
-          <div class="text-2xl mb-2">🤖</div>
-          <div class="font-semibold">OpenAI</div>
-          <div class="text-xs text-slate-400 mt-1">콘텐츠 생성</div>
-        </div>
-        <div class="p-6 rounded-xl bg-white/5 border border-white/10 text-center">
-          <div class="text-2xl mb-2">🎬</div>
-          <div class="font-semibold">ElevenLabs</div>
-          <div class="text-xs text-slate-400 mt-1">TTS</div>
-        </div>
-        <div class="p-6 rounded-xl bg-white/5 border border-white/10 text-center">
-          <div class="text-2xl mb-2">📨</div>
-          <div class="font-semibold">ConvertKit</div>
-          <div class="text-xs text-slate-400 mt-1">이메일 자동화</div>
-        </div>
-        <div class="p-6 rounded-xl bg-white/5 border border-white/10 text-center">
-          <div class="text-2xl mb-2">🔌</div>
-          <div class="font-semibold">MCP</div>
-          <div class="text-xs text-slate-400 mt-1">Context7, Figma 등</div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="card p-6 rounded-xl border bg-card text-center reveal"><div class="text-2xl mb-2" aria-hidden="true">⚡</div><div class="font-semibold">Next.js 15</div><div class="text-xs text-muted mt-1">App Router</div></div>
+          <div class="card p-6 rounded-xl border bg-card text-center reveal" style="transition-delay: .05s;"><div class="text-2xl mb-2" aria-hidden="true">🗄️</div><div class="font-semibold">Supabase</div><div class="text-xs text-muted mt-1">Auth + DB + RLS</div></div>
+          <div class="card p-6 rounded-xl border bg-card text-center reveal" style="transition-delay: .1s;"><div class="text-2xl mb-2" aria-hidden="true">🔄</div><div class="font-semibold">n8n</div><div class="text-xs text-muted mt-1">자동화 워크플로</div></div>
+          <div class="card p-6 rounded-xl border bg-card text-center reveal" style="transition-delay: .15s;"><div class="text-2xl mb-2" aria-hidden="true">💬</div><div class="font-semibold">Solapi</div><div class="text-xs text-muted mt-1">카카오 알림톡</div></div>
+          <div class="card p-6 rounded-xl border bg-card text-center reveal" style="transition-delay: .2s;"><div class="text-2xl mb-2" aria-hidden="true">🤖</div><div class="font-semibold">OpenAI</div><div class="text-xs text-muted mt-1">콘텐츠 생성</div></div>
+          <div class="card p-6 rounded-xl border bg-card text-center reveal" style="transition-delay: .25s;"><div class="text-2xl mb-2" aria-hidden="true">🎬</div><div class="font-semibold">ElevenLabs</div><div class="text-xs text-muted mt-1">TTS</div></div>
+          <div class="card p-6 rounded-xl border bg-card text-center reveal" style="transition-delay: .3s;"><div class="text-2xl mb-2" aria-hidden="true">📨</div><div class="font-semibold">ConvertKit</div><div class="text-xs text-muted mt-1">이메일 자동화</div></div>
+          <div class="card p-6 rounded-xl border bg-card text-center reveal" style="transition-delay: .35s;"><div class="text-2xl mb-2" aria-hidden="true">🔌</div><div class="font-semibold">MCP</div><div class="text-xs text-muted mt-1">Context7 외</div></div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ─────────────── FAQ ─────────────── -->
-  <section id="faq" class="py-24 border-t border-mintorain-700/30">
-    <div class="max-w-3xl mx-auto px-6">
-      <div class="text-center mb-12">
-        <p class="text-mintorain-300 text-sm font-semibold uppercase tracking-wider mb-3">FAQ</p>
-        <h2 class="text-3xl md:text-5xl font-bold">자주 묻는 질문</h2>
-      </div>
+    <!-- ─────────────── FAQ ─────────────── -->
+    <section id="faq" class="py-24 border-t" style="border-color: var(--border);">
+      <div class="max-w-3xl mx-auto px-6">
+        <div class="text-center mb-12 reveal">
+          <p class="text-mintorain-400 text-sm font-semibold uppercase tracking-widest mb-3">FAQ</p>
+          <h2 class="text-3xl md:text-5xl font-bold">자주 묻는 질문</h2>
+        </div>
 
-      <div class="space-y-3">
-        <details class="group rounded-xl bg-white/5 border border-white/10 p-5">
-          <summary class="cursor-pointer font-semibold flex items-center justify-between">
-            <span>5명의 Claude를 동시에 실행하면 비용이 5배 드나요?</span>
-            <span class="text-mintorain-300 group-open:rotate-180 transition">▼</span>
-          </summary>
-          <p class="mt-3 text-slate-300 text-sm leading-relaxed">네, 토큰 사용량은 늘어납니다. 단, Claude Code Pro/Team 정액제를 사용하면 한도 내에서 부담 없이 사용 가능합니다. 또한 5개를 항상 동시 사용할 필요는 없으며, 필요한 패인만 활용하면 됩니다.</p>
-        </details>
-        <details class="group rounded-xl bg-white/5 border border-white/10 p-5">
-          <summary class="cursor-pointer font-semibold flex items-center justify-between">
-            <span>Windows에서 정말 WSL 없이 동작하나요?</span>
-            <span class="text-mintorain-300 group-open:rotate-180 transition">▼</span>
-          </summary>
-          <p class="mt-3 text-slate-300 text-sm leading-relaxed">네. tmux 대신 <strong>Zellij</strong> (Rust 기반 모던 멀티플렉서) 의 Windows 네이티브 빌드를 사용합니다. <code class="px-1 bg-black/40 rounded">winget install arndawg.zellij-windows</code> 로 설치하면 PowerShell만으로 100% 같은 5분할 워크플로가 가능합니다.</p>
-        </details>
-        <details class="group rounded-xl bg-white/5 border border-white/10 p-5">
-          <summary class="cursor-pointer font-semibold flex items-center justify-between">
-            <span>각 패인이 같은 코드베이스를 본다면, 충돌은 어떻게 막나요?</span>
-            <span class="text-mintorain-300 group-open:rotate-180 transition">▼</span>
-          </summary>
-          <p class="mt-3 text-slate-300 text-sm leading-relaxed"><code class="px-1 bg-black/40 rounded">orchestration.md</code> 가 권한 매트릭스를 정의합니다. planner/code-reviewer 는 읽기만, landing-builder/n8n-architect 는 쓰기 가능, 메인 에이전트는 모든 권한. 또한 두 에이전트가 같은 파일을 동시 수정 못하게 "먼저 시작한 에이전트 우선" 규칙이 있습니다.</p>
-        </details>
-        <details class="group rounded-xl bg-white/5 border border-white/10 p-5">
-          <summary class="cursor-pointer font-semibold flex items-center justify-between">
-            <span>역할별 system prompt를 커스터마이징할 수 있나요?</span>
-            <span class="text-mintorain-300 group-open:rotate-180 transition">▼</span>
-          </summary>
-          <p class="mt-3 text-slate-300 text-sm leading-relaxed">네. <code class="px-1 bg-black/40 rounded">mintorain-zellij.kdl</code> (Windows) 또는 tmux 스크립트의 <code class="px-1 bg-black/40 rounded">--append-system-prompt</code> 인자를 직접 수정하면 됩니다. <code class="px-1 bg-black/40 rounded">.claude/agents/*.md</code> 의 역할 정의도 함께 갱신하세요.</p>
-        </details>
-        <details class="group rounded-xl bg-white/5 border border-white/10 p-5">
-          <summary class="cursor-pointer font-semibold flex items-center justify-between">
-            <span>비전공자가 사용해도 되나요?</span>
-            <span class="text-mintorain-300 group-open:rotate-180 transition">▼</span>
-          </summary>
-          <p class="mt-3 text-slate-300 text-sm leading-relaxed">네. 두온교육 바이브코딩 철학이 "비전공자가 AI 도구로 결과물을 만든다" 입니다. 모든 문서가 한국어로, 비전공자 기준으로 작성되어 있습니다. 막히는 부분은 <a href="https://mintorain.duonedu.net" class="text-mintorain-300 hover:underline">홈페이지</a> 로 문의주세요.</p>
-        </details>
+        <div class="space-y-3">
+          <details class="group rounded-xl border bg-card p-5 reveal">
+            <summary class="cursor-pointer font-semibold flex items-center justify-between gap-4">
+              <span>5명의 Claude를 동시에 실행하면 비용이 5배 드나요?</span>
+              <span class="chevron text-mintorain-400 flex-shrink-0" aria-hidden="true">▼</span>
+            </summary>
+            <p class="mt-3 text-secondary text-sm leading-relaxed">네, 토큰 사용량은 늘어납니다. 단, Claude Code Pro/Team 정액제를 사용하면 한도 내에서 부담 없이 사용 가능합니다. 또한 5개를 항상 동시 사용할 필요는 없으며, 필요한 패인만 활용하면 됩니다.</p>
+          </details>
+          <details class="group rounded-xl border bg-card p-5 reveal">
+            <summary class="cursor-pointer font-semibold flex items-center justify-between gap-4">
+              <span>Windows에서 정말 WSL 없이 동작하나요?</span>
+              <span class="chevron text-mintorain-400 flex-shrink-0" aria-hidden="true">▼</span>
+            </summary>
+            <p class="mt-3 text-secondary text-sm leading-relaxed">네. tmux 대신 <strong>Zellij</strong> (Rust 기반 모던 멀티플렉서) 의 Windows 네이티브 빌드를 사용합니다. <code class="px-1 bg-black/40 rounded text-xs font-mono">winget install arndawg.zellij-windows</code> 로 설치하면 PowerShell만으로 100% 같은 5분할 워크플로가 가능합니다.</p>
+          </details>
+          <details class="group rounded-xl border bg-card p-5 reveal">
+            <summary class="cursor-pointer font-semibold flex items-center justify-between gap-4">
+              <span>각 패인이 같은 코드베이스를 본다면, 충돌은 어떻게 막나요?</span>
+              <span class="chevron text-mintorain-400 flex-shrink-0" aria-hidden="true">▼</span>
+            </summary>
+            <p class="mt-3 text-secondary text-sm leading-relaxed"><code class="px-1 bg-black/40 rounded text-xs font-mono">orchestration.md</code> 가 권한 매트릭스를 정의합니다. planner/code-reviewer 는 읽기만, landing-builder/n8n-architect 는 쓰기 가능, 메인 에이전트는 모든 권한. 또한 두 에이전트가 같은 파일을 동시 수정 못하게 "먼저 시작한 에이전트 우선" 규칙이 있습니다.</p>
+          </details>
+          <details class="group rounded-xl border bg-card p-5 reveal">
+            <summary class="cursor-pointer font-semibold flex items-center justify-between gap-4">
+              <span>역할별 system prompt를 커스터마이징할 수 있나요?</span>
+              <span class="chevron text-mintorain-400 flex-shrink-0" aria-hidden="true">▼</span>
+            </summary>
+            <p class="mt-3 text-secondary text-sm leading-relaxed">네. <code class="px-1 bg-black/40 rounded text-xs font-mono">mintorain-zellij.kdl</code> (Windows) 또는 tmux 스크립트의 <code class="px-1 bg-black/40 rounded text-xs font-mono">--append-system-prompt</code> 인자를 직접 수정하면 됩니다. <code class="px-1 bg-black/40 rounded text-xs font-mono">.claude/agents/*.md</code> 의 역할 정의도 함께 갱신하세요.</p>
+          </details>
+          <details class="group rounded-xl border bg-card p-5 reveal">
+            <summary class="cursor-pointer font-semibold flex items-center justify-between gap-4">
+              <span>비전공자가 사용해도 되나요?</span>
+              <span class="chevron text-mintorain-400 flex-shrink-0" aria-hidden="true">▼</span>
+            </summary>
+            <p class="mt-3 text-secondary text-sm leading-relaxed">네. 두온교육 바이브코딩 철학이 "비전공자가 AI 도구로 결과물을 만든다" 입니다. 모든 문서가 한국어로, 비전공자 기준으로 작성되어 있습니다. 막히는 부분은 <a href="https://mintorain.duonedu.net" class="text-mintorain-300 hover:underline">mintorain.duonedu.net</a> 으로 문의주세요.</p>
+          </details>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ─────────────── CTA ─────────────── -->
-  <section class="py-24 border-t border-mintorain-700/30 bg-gradient-to-b from-transparent to-mintorain-900/40">
-    <div class="max-w-4xl mx-auto px-6 text-center">
-      <h2 class="text-3xl md:text-5xl font-bold mb-6">
-        지금 <span class="gradient-text">5분</span> 투자하면<br />
-        <span class="text-white">평생 5명의 동료가 생깁니다</span>
-      </h2>
-      <p class="text-slate-300 mb-10 max-w-2xl mx-auto">
-        MIT License — 자유롭게 사용 / 수정 / 재배포. 회사 / 개인 / 교육 모두 OK.
-      </p>
-      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-        <a href="https://github.com/mintorain/mintorain-tmux-ocastra"
-           class="px-8 py-4 rounded-xl bg-gradient-to-r from-mintorain-600 to-indigo-600 hover:from-mintorain-500 hover:to-indigo-500 transition font-semibold text-white shadow-lg shadow-mintorain-700/30">
-          ⭐ GitHub Star + Clone
-        </a>
-        <a href="https://mintorain.duonedu.net"
-           class="px-8 py-4 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 transition font-semibold text-white">
-          💬 두온교육 바이브코딩 문의
-        </a>
+    <!-- ─────────────── CTA ─────────────── -->
+    <section class="py-24 border-t" style="border-color: var(--border); background: linear-gradient(180deg, transparent, rgba(124, 58, 237, 0.08));">
+      <div class="max-w-4xl mx-auto px-6 text-center reveal">
+        <h2 class="text-3xl md:text-5xl font-bold mb-6 leading-tight">
+          지금 <span class="big-num">5분</span> 투자하면<br />
+          <span class="gradient-text">평생 5명의 동료</span>가 생깁니다
+        </h2>
+        <p class="text-secondary mb-10 max-w-2xl mx-auto">
+          MIT License — 자유롭게 사용 / 수정 / 재배포. 회사 / 개인 / 교육 모두 OK.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a href="https://github.com/mintorain/mintorain-tmux-ocastra"
+             class="w-full sm:w-auto px-8 py-4 rounded-xl btn-primary font-semibold text-white">
+            <span aria-hidden="true">⭐</span> GitHub Star + Clone
+          </a>
+          <a href="https://mintorain.duonedu.net"
+             class="w-full sm:w-auto px-8 py-4 rounded-xl border font-semibold transition hover:scale-105"
+             style="background: var(--bg-card); border-color: var(--border); color: var(--text-primary);">
+            <span aria-hidden="true">💬</span> 두온교육 문의
+          </a>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
+
+  </main>
 
   <!-- ─────────────── Footer ─────────────── -->
-  <footer class="py-12 border-t border-mintorain-700/30">
-    <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-8 text-sm text-slate-400">
+  <footer class="py-12 border-t" style="border-color: var(--border);">
+    <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-8 text-sm text-muted">
       <div>
-        <div class="font-bold text-white text-lg mb-2">🐙 MINTORAIN Tmux Ocastra</div>
+        <div class="font-bold text-lg mb-2" style="color: var(--text-primary);"><span aria-hidden="true">🐙</span> MINTORAIN Tmux Ocastra</div>
         <p>두온교육 바이브코딩 교육센터(by mintorain)</p>
         <p class="mt-1">비전공자가 AI 도구로 결과물을 만드는 '바이브코딩'을 기반으로 합니다.</p>
       </div>
       <div>
-        <div class="font-semibold text-white mb-3">링크</div>
-        <ul class="space-y-2">
-          <li><a href="https://github.com/mintorain/mintorain-tmux-ocastra" class="hover:text-white">GitHub 저장소</a></li>
-          <li><a href="https://github.com/mintorain/mintorain-tmux-ocastra/blob/main/README.md" class="hover:text-white">README</a></li>
-          <li><a href="https://github.com/mintorain/mintorain-tmux-ocastra/blob/main/CONTRIBUTING.md" class="hover:text-white">기여 가이드</a></li>
-          <li><a href="https://github.com/mintorain/mintorain-tmux-ocastra/blob/main/SECURITY.md" class="hover:text-white">보안 신고</a></li>
+        <div class="font-semibold mb-3" style="color: var(--text-primary);">링크</div>
+        <ul class="space-y-2" role="list">
+          <li><a href="https://github.com/mintorain/mintorain-tmux-ocastra" class="hover:text-mintorain-300 transition">GitHub 저장소</a></li>
+          <li><a href="https://github.com/mintorain/mintorain-tmux-ocastra/blob/main/README.md" class="hover:text-mintorain-300 transition">README</a></li>
+          <li><a href="https://github.com/mintorain/mintorain-tmux-ocastra/blob/main/CONTRIBUTING.md" class="hover:text-mintorain-300 transition">기여 가이드</a></li>
+          <li><a href="https://github.com/mintorain/mintorain-tmux-ocastra/blob/main/SECURITY.md" class="hover:text-mintorain-300 transition">보안 신고</a></li>
         </ul>
       </div>
       <div>
-        <div class="font-semibold text-white mb-3">문의 / 홈페이지</div>
-        <ul class="space-y-2">
-          <li><a href="https://mintorain.duonedu.net" class="hover:text-white">🌐 mintorain.duonedu.net</a></li>
-          <li class="text-slate-500 mt-4">© 2026 두온교육 바이브코딩 교육센터</li>
-          <li class="text-slate-500">MIT License</li>
+        <div class="font-semibold mb-3" style="color: var(--text-primary);">문의 / 홈페이지</div>
+        <ul class="space-y-2" role="list">
+          <li><a href="https://mintorain.duonedu.net" class="hover:text-mintorain-300 transition"><span aria-hidden="true">🌐</span> mintorain.duonedu.net</a></li>
+          <li class="mt-4 opacity-70">© 2026 두온교육 바이브코딩 교육센터</li>
+          <li class="opacity-70">MIT License</li>
         </ul>
       </div>
     </div>
   </footer>
+
+  <!-- ─────────────── Sticky Floating CTA ─────────────── -->
+  <a href="https://github.com/mintorain/mintorain-tmux-ocastra"
+     id="floating-cta"
+     class="floating-cta px-5 py-3 rounded-full btn-primary text-white font-semibold text-sm shadow-2xl hidden md:flex items-center gap-2"
+     aria-label="GitHub에서 별 누르기">
+    <span aria-hidden="true">⭐</span>
+    <span>GitHub Star</span>
+  </a>
+
+  <!-- ─────────────── Scripts ─────────────── -->
+  <script>
+    // 1) 테마 토글 (light / dark)
+    (function() {
+      const root = document.documentElement;
+      const stored = localStorage.getItem('mintorain-theme');
+      const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+      const isLight = stored ? stored === 'light' : prefersLight;
+      if (isLight) document.body.classList.add('light');
+      const updateIcon = () => {
+        const icon = document.getElementById('theme-icon');
+        if (icon) icon.textContent = document.body.classList.contains('light') ? '☀️' : '🌙';
+      };
+      updateIcon();
+      const btn = document.getElementById('theme-toggle');
+      if (btn) {
+        btn.addEventListener('click', () => {
+          document.body.classList.toggle('light');
+          const next = document.body.classList.contains('light') ? 'light' : 'dark';
+          localStorage.setItem('mintorain-theme', next);
+          updateIcon();
+        });
+      }
+    })();
+
+    // 2) 스크롤 진입 애니메이션 (IntersectionObserver)
+    (function() {
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const items = document.querySelectorAll('.reveal');
+      if (reduceMotion) {
+        items.forEach(el => el.classList.add('in'));
+        return;
+      }
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+      items.forEach(el => io.observe(el));
+    })();
+
+    // 3) Sticky CTA 표시 (Hero 통과 후)
+    (function() {
+      const cta = document.getElementById('floating-cta');
+      if (!cta) return;
+      const onScroll = () => {
+        if (window.scrollY > window.innerHeight * 0.8) {
+          cta.classList.add('show');
+        } else {
+          cta.classList.remove('show');
+        }
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    })();
+  </script>
 
 </body>
 </html>

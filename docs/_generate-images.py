@@ -37,66 +37,81 @@ def gradient_bg(w: int, h: int, top_color, bottom_color) -> Image.Image:
 
 
 def make_og_image() -> None:
-    """1200x630 OG 이미지 — 카카오톡 / 페북 / 트위터 공유용."""
+    """1200x630 OG 이미지 — 카카오톡 / 페북 / 트위터 공유용 (D-tier 리디자인)."""
     W, H = 1200, 630
-    img = gradient_bg(W, H, INK, INDIGO)
+    img = gradient_bg(W, H, INK, (49, 46, 129))  # ink → indigo-900
     draw = ImageDraw.Draw(img, "RGBA")
 
-    # 격자 패턴 (배경 텍스처)
-    for x in range(0, W, 40):
-        draw.line([(x, 0), (x, H)], fill=(124, 58, 237, 30))
-    for y in range(0, H, 40):
-        draw.line([(0, y), (W, y)], fill=(124, 58, 237, 30))
+    # 1) 격자 (소프트)
+    for x in range(0, W, 48):
+        draw.line([(x, 0), (x, H)], fill=(124, 58, 237, 22))
+    for y in range(0, H, 48):
+        draw.line([(0, y), (W, y)], fill=(124, 58, 237, 22))
 
-    # 상단 배지
+    # 2) 우측 5분할 미니어처 (먼저 그려서 좌측 텍스트와 겹침 방지)
+    mw, mh = 380, 280
+    mx = W - mw - 80
+    my = (H - mh) // 2 - 10
+    draw.rounded_rectangle([mx, my, mx + mw, my + mh], radius=16,
+                           fill=(15, 14, 26, 240), outline=(167, 139, 250, 180), width=2)
+    # 좌측 큰 Leader
+    inset = 12
+    leader_w = int((mw - inset * 2) * 0.56)
+    leader_box = [mx + inset, my + inset, mx + inset + leader_w, my + mh - inset]
+    draw.rounded_rectangle(leader_box, radius=8, fill=(251, 191, 36, 50), outline=(251, 191, 36, 180), width=1)
+    # Leader 아이콘 (텍스트 라벨)
+    label_font = ImageFont.truetype(FONT_BOLD, 18)
+    draw.text((leader_box[0] + 12, leader_box[1] + 12), "👑 Leader", fill=(251, 191, 36), font=label_font)
+    # 우측 4분할
+    right_x = mx + inset + leader_w + 6
+    right_w = mw - inset * 2 - leader_w - 6
+    sub_h = (mh - inset * 2 - 9) // 4
+    panes = [
+        ("📋 Planner",  (253, 224, 71)),
+        ("🎨 Frontend", (74, 222, 128)),
+        ("⚙️ Backend",  (56, 189, 248)),
+        ("🔍 QA",       (248, 113, 113)),
+    ]
+    for i, (text, color) in enumerate(panes):
+        sy = my + inset + i * (sub_h + 3)
+        box = [right_x, sy, right_x + right_w, sy + sub_h]
+        draw.rounded_rectangle(box, radius=6, fill=(color[0], color[1], color[2], 60),
+                               outline=(color[0], color[1], color[2], 200), width=1)
+        draw.text((box[0] + 10, box[1] + 10), text, fill=(color[0], color[1], color[2]), font=label_font)
+
+    # 3) 상단 배지 (좌측)
     badge_font = ImageFont.truetype(FONT_REG, 22)
     badge_text = "🚀  두온교육 바이브코딩 교육센터(by mintorain)"
     bbox = draw.textbbox((0, 0), badge_text, font=badge_font)
     bw, bh = bbox[2] - bbox[0], bbox[3] - bbox[1]
     bx, by = 80, 70
-    pad = 16
+    pad_x, pad_y = 18, 10
     draw.rounded_rectangle(
-        [bx - pad, by - pad, bx + bw + pad, by + bh + pad],
-        radius=22,
-        fill=(124, 58, 237, 80),
+        [bx - pad_x, by - pad_y, bx + bw + pad_x, by + bh + pad_y],
+        radius=24,
+        fill=(124, 58, 237, 70),
         outline=(167, 139, 250, 200),
         width=2,
     )
     draw.text((bx, by), badge_text, fill=(237, 233, 254), font=badge_font)
 
-    # 메인 헤드라인 (큰 글자)
-    title_font = ImageFont.truetype(FONT_BOLD, 88)
-    line1 = "5개의 Claude를,"
-    line2 = "한 화면에서, 동시에"
-    draw.text((80, 170), line1, fill=WHITE, font=title_font)
-    # line2 두 번째 줄에 그라디언트 강조 효과 — 단색으로 대체 (간단화)
-    draw.text((80, 280), line2, fill=PURPLE_LIGHT, font=title_font)
+    # 4) 메인 헤드라인
+    title_font = ImageFont.truetype(FONT_BOLD, 76)
+    draw.text((80, 175), "5개의 Claude를,", fill=WHITE, font=title_font)
+    draw.text((80, 268), "한 화면에서, 동시에", fill=PURPLE_LIGHT, font=title_font)
 
-    # 서브 카피
-    sub_font = ImageFont.truetype(FONT_REG, 30)
-    sub = "터미널 한 번 띄우면 기획자 · 프론트엔드 · 백엔드 · QA · 리더가\n자동 소환되는 Claude Code 팀 에이전트 키트"
-    draw.multiline_text((80, 410), sub, fill=GRAY, font=sub_font, spacing=10)
+    # 5) 서브 카피
+    sub_font = ImageFont.truetype(FONT_REG, 24)
+    sub_text = "기획자 · 프론트엔드 · 백엔드 · QA · 리더가 자동 소환되는\nClaude Code 팀 에이전트 키트"
+    draw.multiline_text((80, 388), sub_text, fill=GRAY, font=sub_font, spacing=8)
 
-    # 하단 OS 배지 라인
-    os_font = ImageFont.truetype(FONT_REG, 24)
-    os_line = "🍎 macOS    🐧 Linux    🪟 Windows Native    🇰🇷 한국어 우선"
-    draw.text((80, 545), os_line, fill=(167, 139, 250), font=os_font)
-
-    # 우측 하단 5분할 미니어처
-    mw, mh = 280, 200
-    mx, my = W - mw - 60, H - mh - 60
-    draw.rounded_rectangle([mx, my, mx + mw, my + mh], radius=12, fill=(15, 14, 26, 230), outline=(124, 58, 237, 180), width=2)
-    # 좌측 큰 칸 (Leader)
-    leader_w = int(mw * 0.55)
-    draw.rounded_rectangle([mx + 10, my + 10, mx + leader_w, my + mh - 10], radius=6, fill=(251, 191, 36, 60))
-    # 우측 4분할
-    right_x = mx + leader_w + 6
-    right_w = mw - leader_w - 16
-    sub_h = (mh - 20 - 12) // 4
-    colors = [(253, 224, 71, 60), (74, 222, 128, 60), (56, 189, 248, 60), (248, 113, 113, 60)]
-    for i, color in enumerate(colors):
-        sy = my + 10 + i * (sub_h + 4)
-        draw.rounded_rectangle([right_x, sy, right_x + right_w, sy + sub_h], radius=6, fill=color)
+    # 6) 하단 OS 배지 + URL 워터마크
+    os_font = ImageFont.truetype(FONT_REG, 22)
+    os_line = "🍎 macOS    🐧 Linux    🪟 Windows Native    🇰🇷 한국어"
+    draw.text((80, 500), os_line, fill=(167, 139, 250), font=os_font)
+    # URL 워터마크 (재공유 시 출처 식별)
+    url_font = ImageFont.truetype(FONT_REG, 18)
+    draw.text((80, 555), "github.com/mintorain/mintorain-tmux-ocastra", fill=(148, 163, 184), font=url_font)
 
     out = OUT / "og-image.png"
     img.save(out, "PNG", optimize=True)
