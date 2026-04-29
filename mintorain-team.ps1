@@ -48,12 +48,14 @@ if ($missing.Count -gt 0) {
     exit 1
 }
 
-# 2. 기존 동일 세션 정리
-$existing = zellij list-sessions 2>$null | Select-String -Pattern "^mintorain"
-if ($existing) {
-    Write-Host "♻️  기존 mintorain 세션 정리 중..." -ForegroundColor Yellow
-    zellij delete-session mintorain --force 2>$null | Out-Null
-}
+# 2. 기존 동일 세션 정리 (kill + delete 둘 다 호출 — idempotent, 없어도 무해)
+#    list-sessions 출력에 ANSI 색상 코드가 포함되어 정규식 매칭이 어려우므로
+#    조건 검사 없이 항상 정리 시도가 가장 안전.
+Write-Host "♻️  기존 mintorain 세션 정리 중..." -ForegroundColor Yellow
+zellij kill-session mintorain 2>$null | Out-Null
+Start-Sleep -Milliseconds 300
+zellij delete-session mintorain 2>$null | Out-Null
+Start-Sleep -Milliseconds 200
 
 # 3. 작업 폴더로 이동
 if (-not (Test-Path $WorkDir)) {
