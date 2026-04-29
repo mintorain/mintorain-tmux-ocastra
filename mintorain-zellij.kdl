@@ -1,0 +1,53 @@
+// =====================================================
+// MINTORAIN Zellij 5분할 팀 에이전트 레이아웃
+// Windows / macOS / Linux 모두 동일하게 동작
+//
+// 사용법:
+//   Windows: pwsh mintorain-team.ps1
+//   macOS/Linux: zellij --session mintorain --layout mintorain-zellij.kdl
+//
+// 패인 인덱스 (focus-next-pane 기준 시계방향):
+//   0: 👑 Leader (좌측, 메인 대화)
+//   1: 📋 Planner
+//   2: 🎨 Frontend
+//   3: ⚙️  Backend
+//   4: 🔍 QA
+// =====================================================
+
+layout {
+    default_tab_template {
+        children
+        pane size=2 borderless=true {
+            plugin location="zellij:status-bar"
+        }
+    }
+
+    tab name="mintorain-team" focus=true {
+        pane split_direction="vertical" {
+            // 좌측: 리더 (메인 대화 패인) - claude 자동 실행
+            pane size="55%" name="👑 Leader" focus=true {
+                command "claude"
+            }
+
+            // 우측: 4개 전문 에이전트 패인 (대기 상태)
+            pane split_direction="horizontal" {
+                pane name="📋 Planner" {
+                    command "pwsh"
+                    args "-NoLogo" "-NoExit" "-Command" "Write-Host '=== 📋 기획자 (Planner) 대기 중 ===' -ForegroundColor Yellow; Write-Host '리더에게 [기획자 소환해줘] 라고 말하면 자동으로 claude가 실행됩니다.' -ForegroundColor Gray"
+                }
+                pane name="🎨 Frontend" {
+                    command "pwsh"
+                    args "-NoLogo" "-NoExit" "-Command" "Write-Host '=== 🎨 프론트엔드 (Frontend) 대기 중 ===' -ForegroundColor Green; Write-Host '리더에게 [프론트엔드 소환해줘] 라고 말하면 자동으로 claude가 실행됩니다.' -ForegroundColor Gray"
+                }
+                pane name="⚙️ Backend" {
+                    command "pwsh"
+                    args "-NoLogo" "-NoExit" "-Command" "Write-Host '=== ⚙️ 백엔드 (Backend) 대기 중 ===' -ForegroundColor Cyan; Write-Host '리더에게 [백엔드 소환해줘] 라고 말하면 자동으로 claude가 실행됩니다.' -ForegroundColor Gray"
+                }
+                pane name="🔍 QA" {
+                    command "pwsh"
+                    args "-NoLogo" "-NoExit" "-Command" "Write-Host '=== 🔍 검수자 (QA) 대기 중 ===' -ForegroundColor Red; Write-Host '리더에게 [검수자 소환해줘] 라고 말하면 자동으로 claude가 실행됩니다.' -ForegroundColor Gray"
+                }
+            }
+        }
+    }
+}

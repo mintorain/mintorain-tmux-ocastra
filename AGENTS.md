@@ -69,6 +69,18 @@
 | `/learn` | 현재 세션에서 패턴 추출 |
 | `/compact` | 컨텍스트 정리 (논리적 구간에서) |
 
+## 플랫폼별 자동 위임 명령
+
+리더가 자연어로 "프론트엔드 소환해줘" 라고 말하면 OS에 맞춰 다음 명령을 실행합니다:
+
+| OS | 멀티플렉서 | 명령 형태 |
+|------|-----------|-----------|
+| 🍎 macOS / 🐧 Linux / 🪟 WSL2 | tmux | `tmux send-keys -t mintorain:1.<N> claude C-m` |
+| 🪟 Windows 네이티브 | Zellij | `pwsh invoke-pane.ps1 -Pane <name> -Command claude` |
+
+패인 매핑 (Windows): `planner=1.2 / frontend=1.3 / backend=1.4 / qa=1.5` 와 동일한 의미.
+상세: [`docs/windows-zellij-guide.md`](./docs/windows-zellij-guide.md)
+
 ## 보안 경계
 
 - 에이전트는 `.env` 파일을 **절대 읽거나 출력하지 않음**

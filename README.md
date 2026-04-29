@@ -32,25 +32,42 @@ pip3 install --user tmuxp
 npm install -g @anthropic-ai/claude-code
 ```
 
-#### 🪟 Windows (WSL2 필수)
-tmux는 Unix 셸 기반이라 Windows 네이티브에서는 동작하지 않습니다. WSL2 (Ubuntu 22.04 권장) 설치 후 위 Linux 절차를 그대로 따르세요.
+#### 🪟 Windows (옵션 A: WSL 없이 네이티브 실행 — 추천)
+tmux 대신 **Zellij** (Rust 기반 모던 멀티플렉서) 를 사용하면 Windows 네이티브로 100% 동일한 5분할 팀 워크플로가 가능합니다.
+```powershell
+winget install Zellij-Contributors.Zellij
+winget install Microsoft.PowerShell
+npm install -g @anthropic-ai/claude-code
+```
+상세 가이드: [`docs/windows-zellij-guide.md`](./docs/windows-zellij-guide.md)
+
+#### 🪟 Windows (옵션 B: WSL2 사용)
+기존 .sh 스크립트를 그대로 쓰고 싶다면 WSL2 + Ubuntu에서 위 Linux 절차를 따르세요.
 ```powershell
 # PowerShell 관리자 권한
 wsl --install -d Ubuntu-22.04
 ```
-WSL2 안에서 프로젝트를 클론하면 `mintorain-tmuxp.sh` 가 정상 동작합니다.
-(`mintorain-team.command` 는 macOS Finder 전용 더블클릭 파일이므로 Windows/Linux 사용자는 `bash mintorain-tmuxp.sh` 로 직접 실행)
 
 ### 2. 팀 에이전트 실행
+
 ```bash
 # 작업할 프로젝트 폴더로 이동 후
 cd /path/to/your-project
+```
 
-# macOS: 더블클릭 또는 명령어
+**🍎 macOS:** 더블클릭 또는 명령어
+```bash
 ./mintorain-team.command
+```
 
-# Linux / WSL2 / 모든 OS: 직접 실행
+**🐧 Linux / WSL2:** 직접 실행
+```bash
 bash /path/to/mintorain-tmuxp.sh
+```
+
+**🪟 Windows 네이티브 (Zellij):** PowerShell에서
+```powershell
+pwsh /path/to/mintorain-team.ps1
 ```
 
 ### 3. 리더 패인에서 자연어로 지시
@@ -72,9 +89,12 @@ mintorain-tmux-ocastra-main/
 ├── orchestration.md           # 시스템 제어 및 충돌 조율
 │
 ├── mintorain-team.command     # macOS 더블클릭 실행 파일
-├── mintorain-tmux.sh          # 순수 tmux 5분할 스크립트
-├── mintorain-tmuxp.sh         # tmuxp 기반 5분할 스크립트
+├── mintorain-tmux.sh          # 순수 tmux 5분할 스크립트 (Linux/macOS/WSL)
+├── mintorain-tmuxp.sh         # tmuxp 기반 5분할 스크립트 (Linux/macOS/WSL)
 ├── mintorain-tmux.yaml        # tmuxp 세션 정의
+├── mintorain-team.ps1         # Windows 네이티브 PowerShell 런처 (Zellij)
+├── mintorain-zellij.kdl       # Zellij 5분할 레이아웃 (Windows/cross-platform)
+├── invoke-pane.ps1            # 리더가 다른 패인 소환 시 호출 (Windows)
 │
 ├── .claude/                   # Claude Code 전용 설정
 │   ├── hooks.json             # 보안/품질 훅 (시크릿 차단, console.log 경고)
@@ -118,12 +138,16 @@ mintorain-tmux-ocastra-main/
 ```
 
 **세션 이름:** `mintorain`
-**리더 패인:** `mintorain:1.1` — 사용자가 대화하는 메인 패인
-**우측 4분할:** `mintorain:1.2~1.5` — 각 전문 에이전트 대기
+**리더 패인:** 좌측 — 사용자가 대화하는 메인 패인
+**우측 4분할:** 각 전문 에이전트 대기
 
 리더가 자연어로 *"프론트엔드 소환해줘"* 라고 말하면,
-백그라운드 팀 모드 대신 `tmux send-keys -t mintorain:1.3 claude C-m`
-명령으로 해당 패인에 실제 Claude 에이전트를 띄웁니다.
+플랫폼별로 다음 명령이 자동 실행되어 해당 패인에 실제 Claude 에이전트가 뜹니다:
+
+| OS | 멀티플렉서 | 자동 소환 명령 |
+|------|-----------|----------------|
+| 🍎 macOS / 🐧 Linux / 🪟 WSL2 | tmux | `tmux send-keys -t mintorain:1.3 claude C-m` |
+| 🪟 Windows 네이티브 | Zellij | `pwsh invoke-pane.ps1 -Pane frontend -Command claude` |
 
 ---
 

@@ -99,19 +99,30 @@ type ApiResponse<T> =
 - 유튜브 쇼츠 → `youtube-shorts` 스킬
 - 상세 참조 → AGENTS.md 확인
 
-## 팀 에이전트 실행 (tmux 5분할)
+## 팀 에이전트 실행 (5분할)
 
+### 🍎 macOS / 🐧 Linux / 🪟 WSL2 (tmux 기반)
 ```bash
-# macOS 더블클릭
-./mintorain-team.command
-
-# 또는 직접 실행
-bash ./mintorain-tmux.sh        # 순수 tmux 버전
-bash ./mintorain-tmuxp.sh       # tmuxp YAML 버전
+./mintorain-team.command         # macOS 더블클릭
+bash ./mintorain-tmux.sh         # 순수 tmux 버전
+bash ./mintorain-tmuxp.sh        # tmuxp YAML 버전
 ```
 
-세션 이름: `mintorain` / 패인 구성: 1.1 리더, 1.2 기획자, 1.3 프론트엔드, 1.4 백엔드, 1.5 검수자.
-리더가 자연어로 "프론트엔드 소환해줘" 라고 말하면, `tmux send-keys -t mintorain:1.3 claude C-m` 명령으로 해당 패인에 Claude 에이전트를 로그인시킵니다.
+### 🪟 Windows 네이티브 (Zellij 기반, WSL 불필요)
+```powershell
+pwsh ./mintorain-team.ps1
+```
+사전 설치: `winget install Zellij-Contributors.Zellij Microsoft.PowerShell` + `npm install -g @anthropic-ai/claude-code`
+
+### 자동 위임 명령 (리더가 사용)
+세션 이름은 모든 플랫폼 동일하게 `mintorain`. 패인 구성: 리더 + 기획자 + 프론트엔드 + 백엔드 + 검수자.
+
+| OS | 자동 소환 명령 |
+|------|----------------|
+| macOS/Linux/WSL2 | `tmux send-keys -t mintorain:1.3 claude C-m` (1.2~1.5) |
+| Windows 네이티브 | `pwsh invoke-pane.ps1 -Pane {planner\|frontend\|backend\|qa} -Command claude` |
+
+리더 Claude는 사용자의 자연어 요청을 위 명령어로 자동 변환하여 실제 패인에 에이전트를 띄웁니다.
 
 ## 환경변수 체크리스트
 
