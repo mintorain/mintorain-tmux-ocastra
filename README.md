@@ -205,6 +205,16 @@ mintorain-tmux-ocastra-main/
 
 ---
 
+## 🎨 랜딩페이지
+
+[`docs/index.html`](./docs/index.html) — 단일 HTML, TailwindCSS CDN, 모바일 반응형. GitHub Pages에서 docs/ 폴더를 소스로 설정하면 자동 배포됩니다.
+
+배포 활성화:
+1. GitHub 저장소 → Settings → Pages
+2. Source: `Deploy from a branch`
+3. Branch: `main`, Folder: `/docs` 선택 → Save
+4. 1~2분 후 `https://mintorain.github.io/mintorain-tmux-ocastra/` 로 접근 가능
+
 ## 📜 라이선스
 
 MIT License — 자유롭게 사용, 수정, 재배포 가능합니다.
