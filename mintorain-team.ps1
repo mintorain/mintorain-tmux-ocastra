@@ -76,6 +76,53 @@ $env:PYTHONIOENCODING = "utf-8"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 chcp 65001 | Out-Null
 
+# 5.5 claude trust 다이얼로그 자동 우회 — 작업 폴더 사전 등록
+#     ~/.claude.json 의 projects.<WorkDir>.hasTrustDialogAccepted = true
+#     PowerShell 7+ 의 ConvertFrom-Json -Depth 옵션 필요 (mintorain-team.ps1 은 pwsh로 실행되어야 함)
+$claudeJson = Join-Path $env:USERPROFILE '.claude.json'
+if (Test-Path $claudeJson) {
+    try {
+        $cfg = Get-Content $claudeJson -Raw | ConvertFrom-Json -Depth 50
+        $changed = $false
+
+        if (-not $cfg.PSObject.Properties.Name.Contains('projects')) {
+            $cfg | Add-Member -NotePropertyName 'projects' -NotePropertyValue ([PSCustomObject]@{}) -Force
+            $changed = $true
+        }
+
+        # 작업 폴더와 키트 폴더 모두 자동 trust 등록
+        $dirsToTrust = @($WorkDir, $ScriptDir) | Select-Object -Unique
+        foreach ($dir in $dirsToTrust) {
+            $existing = $cfg.projects.PSObject.Properties.Name -contains $dir
+            if (-not $existing) {
+                $cfg.projects | Add-Member -NotePropertyName $dir -NotePropertyValue ([PSCustomObject]@{
+                    hasTrustDialogAccepted = $true
+                    allowedTools = @()
+                    history = @()
+                }) -Force
+                Write-Host "🔓 trust 자동 등록: $dir" -ForegroundColor Green
+                $changed = $true
+            } elseif ($cfg.projects.$dir.hasTrustDialogAccepted -ne $true) {
+                $cfg.projects.$dir.hasTrustDialogAccepted = $true
+                Write-Host "🔓 trust 갱신: $dir" -ForegroundColor Green
+                $changed = $true
+            }
+        }
+
+        if ($changed) {
+            # 백업 후 저장
+            if (-not (Test-Path "$claudeJson.bak")) {
+                Copy-Item $claudeJson "$claudeJson.bak" -Force
+            }
+            $cfg | ConvertTo-Json -Depth 50 -Compress | Set-Content -Path $claudeJson -Encoding UTF8 -NoNewline
+        }
+    } catch {
+        Write-Host "⚠️  trust 자동 등록 실패 (수동 'Yes, I trust this folder' 필요): $_" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "ℹ️  $claudeJson 없음 (claude 첫 실행 후 생성됨) — trust 등록 skip" -ForegroundColor Gray
+}
+
 # 6. Zellij 실행
 #    --new-session-with-layout: 항상 새 세션 생성 (--session 단독은 기존 세션 attach용이라 "no active session" 오류 발생)
 #    -s mintorain: 세션 이름 지정 (재연결: zellij attach mintorain)
