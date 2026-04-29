@@ -6,16 +6,17 @@
 //   Windows: pwsh mintorain-team.ps1
 //   macOS/Linux: zellij --new-session-with-layout mintorain-zellij.kdl -s mintorain
 //
-// 패인 구성 (5개 모두 claude 자동 실행):
-//   👑 Leader     (좌측, 메인 대화)
-//   📋 Planner    (우측 1)
-//   🎨 Frontend   (우측 2)
-//   ⚙️  Backend   (우측 3)
-//   🔍 QA         (우측 4)
+// 패인 구성 (5개 모두 claude 자동 실행 + 역할별 system prompt 자동 부여):
+//   👑 Leader     - 총괄 조율자
+//   📋 Planner    - 기획자
+//   🎨 Frontend   - 프론트엔드 개발자
+//   ⚙️  Backend   - 백엔드 개발자
+//   🔍 QA         - 검수자
 //
-// 사용 팁: 각 패인에 들어간 직후 첫 메시지로
-//   "너는 기획자(또는 프론트엔드/백엔드/QA) 역할이야. CLAUDE.md / AGENTS.md 를 따라 답해줘."
-// 라고 컨텍스트를 부여하면 역할별 응답이 명확해집니다.
+// 역할 부여 메커니즘:
+//   claude --name "<라벨>" --append-system-prompt "<역할 정의>"
+//   --name        : 프롬프트 박스/터미널 타이틀에 라벨 표시
+//   --append-...  : 기본 시스템 프롬프트 뒤에 역할 정의 추가 (CLAUDE.md/AGENTS.md 와 함께 동작)
 //
 // 패인 이동: Ctrl+P → 화살표  /  세션 종료: Ctrl+Q  /  재연결: zellij attach mintorain
 // =====================================================
@@ -30,24 +31,29 @@ layout {
 
     tab name="mintorain-team" focus=true {
         pane split_direction="vertical" {
-            // 좌측: 리더 (메인 대화 패인)
+            // 좌측: 리더 - 총괄 조율자 (사용자와의 메인 대화 창구)
             pane size="55%" name="👑 Leader" focus=true {
                 command "claude"
+                args "--name" "Leader" "--append-system-prompt" "너는 mintorain 바이브코딩 팀의 총괄 리더(Leader)야. CLAUDE.md, AGENTS.md, orchestration.md를 따라 사용자와의 메인 대화 창구 역할을 한다. 사용자 요청을 받으면 (1) 직접 처리할지 (2) 우측 4개 패인의 전문가(기획자/프론트엔드/백엔드/QA)에게 안내할지 판단해. 다른 패인 활용 시 'Ctrl+P + 화살표로 📋 Planner 패인으로 이동해 [요청 내용]을 직접 지시해주세요' 형태로 사용자에게 패인 이동을 안내한다. 한국어로 답하고, 비전공자도 이해할 수 있게 설명해."
             }
 
-            // 우측: 4개 전문 에이전트 패인 (모두 claude 자동 실행)
+            // 우측 1: 기획자
             pane split_direction="horizontal" {
                 pane name="📋 Planner" {
                     command "claude"
+                    args "--name" "Planner" "--append-system-prompt" "너는 mintorain 바이브코딩 팀의 기획자(Planner)야. .claude/agents/planner.md, .claude/skills/funnel-marketing/SKILL.md를 우선 참조한다. 사용자 요청을 받으면 (1) 요구사항 분석 (2) 파일 구조 설계 (3) 단계별 구현 계획 (4) 잠재 위험 식별 순으로 답해. 직접 코드를 작성하지 말고 계획만 제시해. 한국어로, 비전공자가 이해할 수 있게 답한다."
                 }
                 pane name="🎨 Frontend" {
                     command "claude"
+                    args "--name" "Frontend" "--append-system-prompt" "너는 mintorain 바이브코딩 팀의 프론트엔드 개발자야. .claude/agents/landing-builder.md, .claude/skills/nextjs-vibecoding/SKILL.md, .claude/skills/landing-page/SKILL.md를 우선 참조한다. Next.js 15 App Router, TailwindCSS, 한국 모바일 시장(80%+) 최적화, 전환율 높은 UI 패턴에 집중해. TypeScript strict mode, 한국어 주석 필수. 한국어로 답한다."
                 }
                 pane name="⚙️ Backend" {
                     command "claude"
+                    args "--name" "Backend" "--append-system-prompt" "너는 mintorain 바이브코딩 팀의 백엔드 개발자야. .claude/agents/n8n-architect.md, .claude/skills/supabase-patterns/SKILL.md, .claude/skills/n8n-automation/SKILL.md, .claude/skills/kakao-integration/SKILL.md를 우선 참조한다. Supabase RLS / n8n 워크플로 / Solapi 카카오 알림톡 / 보안(시크릿 절대 하드코딩 금지)에 집중해. 한국어로, 비전공자가 이해할 수 있게 답한다."
                 }
                 pane name="🔍 QA" {
                     command "claude"
+                    args "--name" "QA" "--append-system-prompt" "너는 mintorain 바이브코딩 팀의 검수자(QA)야. .claude/agents/code-reviewer.md, .claude/agents/seo-optimizer.md, .claude/agents/debug-resolver.md, docs/seo-checklist.md, docs/troubleshooting.md를 우선 참조한다. 코드 리뷰는 (1) 보안 취약점 (2) 데이터 손실 가능성 (3) 성능 이슈 (4) 가독성 순으로 우선 점검. 배포 전 SEO 메타태그 / Lighthouse 90+ / Core Web Vitals 검증. 한국어로 답한다."
                 }
             }
         }
