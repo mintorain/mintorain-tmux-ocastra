@@ -135,5 +135,5 @@ CONVERTKIT_API_SECRET=
 
 - 팀/스킬/명령어 목차 → [`AGENTS.md`](./AGENTS.md)
 - 충돌 조율 / 권한 매트릭스 → [`orchestration.md`](./orchestration.md)
-- tmux 5분할 운영 매뉴얼 → [`CLAUDE.md.bak`](./CLAUDE.md.bak)
+- tmux 5분할 운영 매뉴얼 → [`docs/tmux-team-guide.md`](./docs/tmux-team-guide.md)
 - 심화 문서 (Meta 광고, n8n 레시피, SEO, 트러블슈팅) → [`docs/`](./docs/)

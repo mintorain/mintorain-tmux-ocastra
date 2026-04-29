@@ -3,7 +3,7 @@
 # MINTORAIN Tmux 자동 분할 세팅 v7 (tmuxp 버전)
 # Claude Team Agent 최적화 모드
 # ============================================
-# CLAUDE.md.bak 필수 규칙 적용:
+# docs/tmux-team-guide.md 필수 규칙 적용:
 #   규칙 1: tmux 5분할 (리더 + 기획자/프론트엔드/백엔드/검수자)
 #   규칙 2: 네이티브 팀 기능 사용 금지 (CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=0)
 #   규칙 3: tmux 마우스 및 변수 조작 방지 (~/.tmux.conf 자동 설정)

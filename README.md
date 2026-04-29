@@ -18,20 +18,38 @@
 ## 🚀 빠른 시작
 
 ### 1. 사전 요구사항
+
+#### 🍎 macOS
 ```bash
-# macOS / Linux
-brew install tmux tmuxp           # tmux + tmuxp
-npm install -g @anthropic-ai/claude-code   # Claude Code CLI
+brew install tmux tmuxp                       # tmux + tmuxp
+npm install -g @anthropic-ai/claude-code      # Claude Code CLI
 ```
+
+#### 🐧 Linux (Ubuntu/Debian)
+```bash
+sudo apt-get install -y tmux python3-pip
+pip3 install --user tmuxp
+npm install -g @anthropic-ai/claude-code
+```
+
+#### 🪟 Windows (WSL2 필수)
+tmux는 Unix 셸 기반이라 Windows 네이티브에서는 동작하지 않습니다. WSL2 (Ubuntu 22.04 권장) 설치 후 위 Linux 절차를 그대로 따르세요.
+```powershell
+# PowerShell 관리자 권한
+wsl --install -d Ubuntu-22.04
+```
+WSL2 안에서 프로젝트를 클론하면 `mintorain-tmuxp.sh` 가 정상 동작합니다.
+(`mintorain-team.command` 는 macOS Finder 전용 더블클릭 파일이므로 Windows/Linux 사용자는 `bash mintorain-tmuxp.sh` 로 직접 실행)
 
 ### 2. 팀 에이전트 실행
 ```bash
 # 작업할 프로젝트 폴더로 이동 후
 cd /path/to/your-project
 
-# 더블클릭 또는 명령어로 실행
+# macOS: 더블클릭 또는 명령어
 ./mintorain-team.command
-# 또는
+
+# Linux / WSL2 / 모든 OS: 직접 실행
 bash /path/to/mintorain-tmuxp.sh
 ```
 
@@ -52,7 +70,6 @@ mintorain-tmux-ocastra-main/
 ├── AGENTS.md                  # 에이전트 팀 가이드
 ├── MEMORY.md                  # 자동 기억 저장소
 ├── orchestration.md           # 시스템 제어 및 충돌 조율
-├── CLAUDE.md.bak              # tmux 운영 매뉴얼 백업
 │
 ├── mintorain-team.command     # macOS 더블클릭 실행 파일
 ├── mintorain-tmux.sh          # 순수 tmux 5분할 스크립트
@@ -77,6 +94,7 @@ mintorain-tmux-ocastra-main/
 │       └── mcp-setup/
 │
 └── docs/                      # 심화 문서 (Progressive Disclosure)
+    ├── tmux-team-guide.md     # tmux 5분할 운영 규칙
     ├── meta-ads-playbook.md
     ├── n8n-recipes.md
     ├── seo-checklist.md
@@ -146,6 +164,9 @@ mintorain-tmux-ocastra-main/
 - ❌ `sk-...`, `AKIA...`, `ghp_...`, `password=...` 하드코딩 시 **저장 차단**
 - ⚠️ `.ts/.tsx/.js/.jsx` 파일에 `console.log` 발견 시 경고
 - 💡 `npm run dev` 명령어 사용 시 tmux 권장 메시지
+- 🧠 세션 종료 시 `MEMORY.md` 에 타임스탬프 자동 기록
+
+> **OS 호환성 주의:** 훅 명령어는 `#!/bin/bash` 기반입니다. macOS / Linux / WSL2 / Git Bash 환경에서 작동하며, Windows 네이티브 cmd / PowerShell 에서는 침묵 실패합니다. Windows 사용자는 WSL2 또는 Git Bash 안에서 Claude Code를 실행하세요.
 
 ---
 
@@ -153,8 +174,10 @@ mintorain-tmux-ocastra-main/
 
 - [`CLAUDE.md`](./CLAUDE.md) — 에이전트 운영 매뉴얼 (Level 0)
 - [`AGENTS.md`](./AGENTS.md) — 에이전트 팀 / 스킬 / 명령어 목차 (Level 1)
-- [`CLAUDE.md.bak`](./CLAUDE.md.bak) — tmux 5분할 운영 규칙 상세 가이드
+- [`docs/tmux-team-guide.md`](./docs/tmux-team-guide.md) — tmux 5분할 운영 규칙 상세 가이드
 - [`docs/`](./docs/) — Meta 광고, n8n 레시피, SEO 체크리스트, 트러블슈팅
+- [`CONTRIBUTING.md`](./CONTRIBUTING.md) — 기여 가이드라인
+- [`SECURITY.md`](./SECURITY.md) — 보안 취약점 신고
 
 ---
 

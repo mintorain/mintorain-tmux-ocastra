@@ -7,6 +7,7 @@
 
 | 문서 | 용도 |
 |------|------|
+| `tmux-team-guide.md` | tmux 5분할 팀 운영 규칙 (필수 규칙 3가지) |
 | `n8n-recipes.md` | 검증된 n8n 워크플로 레시피 모음 |
 | `meta-ads-playbook.md` | Meta 광고 세팅 및 최적화 플레이북 |
 | `seo-checklist.md` | 한국 SEO 체크리스트 (네이버 + 구글) |
