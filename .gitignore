@@ -1,0 +1,76 @@
+# =====================================================
+# MINTORAIN 바이브코딩 - .gitignore
+# =====================================================
+
+# --- 환경변수 (절대 커밋 금지) ---
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+
+# --- 노드 / 패키지 ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# --- Next.js / 빌드 결과물 ---
+.next/
+out/
+build/
+dist/
+.turbo/
+
+# --- TypeScript ---
+*.tsbuildinfo
+next-env.d.ts
+
+# --- 테스트 / 커버리지 ---
+coverage/
+.nyc_output/
+*.lcov
+
+# --- IDE / OS ---
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Claude Code / OMC 자동 생성 상태 ---
+.omc/state/
+.omc/logs/
+.omc/sessions/
+.omc/notepad.md
+.omc/project-memory.json
+.bkit-memory.json
+.pdca-status.json
+
+# --- n8n 백업 (크레덴셜 포함된 임시본) ---
+n8n/*.tmp.json
+n8n/exports/
+
+# --- 로그 ---
+logs/
+*.log
+
+# --- Vercel ---
+.vercel/
+
+# --- Sentry ---
+.sentryclirc
+
+# --- Supabase 로컬 ---
+supabase/.branches/
+supabase/.temp/
+
+# --- 기타 ---
+.cache/
+.parcel-cache/
+*.tgz
+.eslintcache
