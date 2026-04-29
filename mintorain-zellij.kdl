@@ -4,14 +4,20 @@
 //
 // 사용법:
 //   Windows: pwsh mintorain-team.ps1
-//   macOS/Linux: zellij --session mintorain --layout mintorain-zellij.kdl
+//   macOS/Linux: zellij --new-session-with-layout mintorain-zellij.kdl -s mintorain
 //
-// 패인 인덱스 (focus-next-pane 기준 시계방향):
-//   0: 👑 Leader (좌측, 메인 대화)
-//   1: 📋 Planner
-//   2: 🎨 Frontend
-//   3: ⚙️  Backend
-//   4: 🔍 QA
+// 패인 구성 (5개 모두 claude 자동 실행):
+//   👑 Leader     (좌측, 메인 대화)
+//   📋 Planner    (우측 1)
+//   🎨 Frontend   (우측 2)
+//   ⚙️  Backend   (우측 3)
+//   🔍 QA         (우측 4)
+//
+// 사용 팁: 각 패인에 들어간 직후 첫 메시지로
+//   "너는 기획자(또는 프론트엔드/백엔드/QA) 역할이야. CLAUDE.md / AGENTS.md 를 따라 답해줘."
+// 라고 컨텍스트를 부여하면 역할별 응답이 명확해집니다.
+//
+// 패인 이동: Ctrl+P → 화살표  /  세션 종료: Ctrl+Q  /  재연결: zellij attach mintorain
 // =====================================================
 
 layout {
@@ -24,28 +30,24 @@ layout {
 
     tab name="mintorain-team" focus=true {
         pane split_direction="vertical" {
-            // 좌측: 리더 (메인 대화 패인) - claude 자동 실행
+            // 좌측: 리더 (메인 대화 패인)
             pane size="55%" name="👑 Leader" focus=true {
                 command "claude"
             }
 
-            // 우측: 4개 전문 에이전트 패인 (대기 상태)
+            // 우측: 4개 전문 에이전트 패인 (모두 claude 자동 실행)
             pane split_direction="horizontal" {
                 pane name="📋 Planner" {
-                    command "pwsh"
-                    args "-NoLogo" "-NoExit" "-Command" "Write-Host '=== 📋 기획자 (Planner) 대기 중 ===' -ForegroundColor Yellow; Write-Host '리더에게 [기획자 소환해줘] 라고 말하면 자동으로 claude가 실행됩니다.' -ForegroundColor Gray"
+                    command "claude"
                 }
                 pane name="🎨 Frontend" {
-                    command "pwsh"
-                    args "-NoLogo" "-NoExit" "-Command" "Write-Host '=== 🎨 프론트엔드 (Frontend) 대기 중 ===' -ForegroundColor Green; Write-Host '리더에게 [프론트엔드 소환해줘] 라고 말하면 자동으로 claude가 실행됩니다.' -ForegroundColor Gray"
+                    command "claude"
                 }
                 pane name="⚙️ Backend" {
-                    command "pwsh"
-                    args "-NoLogo" "-NoExit" "-Command" "Write-Host '=== ⚙️ 백엔드 (Backend) 대기 중 ===' -ForegroundColor Cyan; Write-Host '리더에게 [백엔드 소환해줘] 라고 말하면 자동으로 claude가 실행됩니다.' -ForegroundColor Gray"
+                    command "claude"
                 }
                 pane name="🔍 QA" {
-                    command "pwsh"
-                    args "-NoLogo" "-NoExit" "-Command" "Write-Host '=== 🔍 검수자 (QA) 대기 중 ===' -ForegroundColor Red; Write-Host '리더에게 [검수자 소환해줘] 라고 말하면 자동으로 claude가 실행됩니다.' -ForegroundColor Gray"
+                    command "claude"
                 }
             }
         }

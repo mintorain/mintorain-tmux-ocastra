@@ -114,37 +114,29 @@ pwsh ./mintorain-team.ps1
 ```
 사전 설치: `winget install Zellij-Contributors.Zellij Microsoft.PowerShell` + `npm install -g @anthropic-ai/claude-code`
 
-### 🚨 자동 위임 규칙 (리더 Claude가 반드시 따라야 함)
+### 운영 모델: 5개 패인 모두 claude 자동 실행
 
-**사용자가 "기획자 소환", "프론트엔드 불러", "백엔드 검토 요청", "QA 시켜" 같은 자연어 발화를 하면, 즉시 Bash 또는 PowerShell 도구로 다음 명령을 실행하라.** 단순 답변으로 끝내지 말 것.
+이 키트는 5분할 시작 시 **모든 패인에 claude가 동시에 실행**됩니다. 우측 4개 패인은 빈 컨텍스트로 시작하므로, 사용자가 해당 패인에 들어갔을 때 첫 메시지로 역할을 부여하세요:
 
-세션 이름은 모든 플랫폼 동일하게 `mintorain`. 패인 구성: 리더 + 기획자(planner) + 프론트엔드(frontend) + 백엔드(backend) + 검수자(qa).
-
-#### Windows 네이티브 (Zellij)
-```powershell
-pwsh -File "<KIT_DIR>/invoke-pane.ps1" -Pane <planner|frontend|backend|qa> -Command claude
 ```
-KIT_DIR 은 본 CLAUDE.md 가 위치한 디렉토리. PATH에 등록되어 있으면 그냥 `invoke-pane.ps1 -Pane ... -Command ...` 로 실행 가능.
-
-#### macOS / Linux / WSL2 (tmux)
-```bash
-tmux send-keys -t mintorain:1.<N> claude C-m
+너는 기획자(또는 프론트엔드/백엔드/QA) 역할이야.
+CLAUDE.md, AGENTS.md, .claude/agents/<역할>.md 를 따라 답해줘.
 ```
-- 기획자: `1.2`, 프론트엔드: `1.3`, 백엔드: `1.4`, 검수자: `1.5`
 
-#### 매핑 표 (자연어 → 실행 명령)
-| 사용자 발화 키워드 | 대상 패인 | Windows 실행 명령 |
-|------------------|----------|------------------|
-| 기획자 / planner / 기획 | planner | `invoke-pane.ps1 -Pane planner -Command claude` |
-| 프론트엔드 / frontend / 프론트 | frontend | `invoke-pane.ps1 -Pane frontend -Command claude` |
-| 백엔드 / backend / 서버 | backend | `invoke-pane.ps1 -Pane backend -Command claude` |
-| 검수자 / QA / qa / 테스트 | qa | `invoke-pane.ps1 -Pane qa -Command claude` |
+#### 패인 이동 / 운영
+- **패인 이동:** `Ctrl+P` → 화살표 (Zellij), `Ctrl+B` → 화살표 (tmux)
+- **세션 분리 후 재연결:** `zellij attach mintorain` / `tmux attach -t mintorain`
+- **세션 종료:** `Ctrl+Q` (Zellij) / `Ctrl+B + :kill-session` (tmux)
 
-#### 행동 규칙 (꼭 지킬 것)
-1. 사용자 발화에 위 매핑 키워드가 있고 동사가 "소환/불러/실행/시켜/요청" 류이면 → **즉시 명령 실행**
-2. 명령 실행 후 *"기획자 패인에 claude를 띄웠습니다. 우측 1번 패인을 확인하세요"* 형태로 짧게 응답
-3. 사용자 작업 폴더는 그대로 유지 (cd 금지). invoke-pane.ps1 / tmux send-keys 만 호출
-4. 동시 다발 소환 가능 — 여러 패인에 한꺼번에 명령 보내도 됨
+#### 리더의 역할
+좌측 리더 패인은 **전체 작업 조율**과 **사용자와의 메인 대화**를 담당합니다. 사용자가 "기획자에게 시켜줘" 같은 요청을 하면, 리더는 다음 중 하나를 선택:
+
+1. **수동 안내**: *"우측 1번 패인(📋 Planner)으로 이동해서 직접 지시해주세요"*
+2. **자동 호출 시도**: 아래 명령을 도구로 실행 (Windows zellij 일부 빌드는 외부 IPC 미지원이라 실패 가능)
+   - Windows: `invoke-pane.ps1 -Pane <planner|frontend|backend|qa> -Command "<지시문>"`
+   - macOS/Linux: `tmux send-keys -t mintorain:1.<N> "<지시문>" C-m`
+
+기본 동작은 **수동 안내**가 가장 안정적입니다. invoke-pane.ps1 자동 호출은 사용자가 명시적으로 요청할 때만 사용하세요.
 
 ## 환경변수 체크리스트
 
