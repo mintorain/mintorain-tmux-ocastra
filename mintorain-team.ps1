@@ -75,8 +75,11 @@ $env:PYTHONIOENCODING = "utf-8"
 chcp 65001 | Out-Null
 
 # 6. Zellij 실행
+#    --new-session-with-layout: 항상 새 세션 생성 (--session 단독은 기존 세션 attach용이라 "no active session" 오류 발생)
+#    -s mintorain: 세션 이름 지정 (재연결: zellij attach mintorain)
 Write-Host "🚀 Zellij 5분할 팀 세션을 시작합니다..." -ForegroundColor Green
 Write-Host "   세션 종료: Ctrl+Q   |   패인 이동: Ctrl+P + 화살표" -ForegroundColor Gray
+Write-Host "   재연결:    zellij attach mintorain" -ForegroundColor Gray
 Write-Host ""
 
-zellij --session mintorain --layout $LayoutFile
+zellij --new-session-with-layout $LayoutFile -s mintorain
