@@ -64,12 +64,42 @@ if (-not (Test-Path $WorkDir)) {
 }
 Set-Location -Path $WorkDir
 
-# 4. 레이아웃 파일 확인
-$LayoutFile = Join-Path $ScriptDir "mintorain-zellij.kdl"
-if (-not (Test-Path $LayoutFile)) {
-    Write-Host "❌ 레이아웃 파일을 찾을 수 없습니다: $LayoutFile" -ForegroundColor Red
+# 4. 레이아웃 템플릿 확인 + 작업 폴더 주입한 임시 KDL 생성
+#    KDL 안의 {{WORK_DIR}} placeholder 를 실제 작업 폴더 경로로 치환해서
+#    각 패인이 사용자가 실행한 그 폴더에서 시작되도록 한다.
+$LayoutTemplate = Join-Path $ScriptDir "mintorain-zellij.kdl"
+if (-not (Test-Path $LayoutTemplate)) {
+    Write-Host "❌ 레이아웃 파일을 찾을 수 없습니다: $LayoutTemplate" -ForegroundColor Red
     exit 1
 }
+
+# Zellij KDL은 백슬래시 경로 처리에 민감하므로 forward slash 형태로 변환
+$WorkDirForKdl = $WorkDir   -replace '\\', '/'
+$KitDirForKdl  = $ScriptDir -replace '\\', '/'
+
+# Leader 시스템 프롬프트 파일을 읽어 KDL string 으로 escape
+# escape 순서: 백슬래시 → \\, 따옴표 → \", CRLF/LF → \n  (KDL spec)
+$LeaderPromptPath = Join-Path $ScriptDir 'prompts/leader.txt'
+if (-not (Test-Path $LeaderPromptPath)) {
+    Write-Host "❌ Leader prompt 파일을 찾을 수 없습니다: $LeaderPromptPath" -ForegroundColor Red
+    exit 1
+}
+$LeaderPromptRaw = Get-Content $LeaderPromptPath -Raw -Encoding UTF8
+$LeaderPromptForKdl = $LeaderPromptRaw.Replace('\', '\\').Replace('"', '\"').Replace("`r`n", "`n").Replace("`n", '\n')
+
+# zellij 자식 프로세스(claude 패인들)에 키트 폴더 경로 상속
+# Leader 가 invoke-pane.ps1 을 호출할 때 사용
+$env:MINTORAIN_KIT_DIR = $ScriptDir
+
+# KDL placeholder 치환 — {{WORK_DIR}}, {{KIT_DIR}}, {{LEADER_PROMPT}}
+$LayoutContent = (Get-Content $LayoutTemplate -Raw) `
+    -replace '\{\{WORK_DIR\}\}',     $WorkDirForKdl `
+    -replace '\{\{KIT_DIR\}\}',      $KitDirForKdl `
+    -replace '\{\{LEADER_PROMPT\}\}', $LeaderPromptForKdl
+
+# 임시 KDL 파일에 기록 (zellij 종료 후 삭제)
+$LayoutFile = Join-Path $env:TEMP "mintorain-zellij-$PID.kdl"
+$LayoutContent | Set-Content -Path $LayoutFile -Encoding UTF8
 
 # 5. UTF-8 출력 강제 (한글/이모지 깨짐 방지)
 $env:PYTHONIOENCODING = "utf-8"
@@ -131,4 +161,10 @@ Write-Host "   세션 종료: Ctrl+Q   |   패인 이동: Ctrl+P + 화살표" -F
 Write-Host "   재연결:    zellij attach mintorain" -ForegroundColor Gray
 Write-Host ""
 
-zellij --new-session-with-layout $LayoutFile -s mintorain
+try {
+    zellij --new-session-with-layout $LayoutFile -s mintorain
+}
+finally {
+    # 임시 KDL 파일 정리 (zellij 정상/비정상 종료 모두 커버)
+    Remove-Item $LayoutFile -ErrorAction SilentlyContinue
+}
