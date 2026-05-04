@@ -20,6 +20,8 @@ fi
 SESSION="mintorain"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 WORK_DIR="${1:-$PWD}"
+# tmux 자식 패인에 상속될 환경변수 (Leader 가 위임 명령 작성 시 참조)
+export MINTORAIN_KIT_DIR="$SCRIPT_DIR"
 
 # ===========================================
 # 필수 도구 확인
@@ -99,6 +101,10 @@ tmux select-pane -t "$SESSION:1.5" -P "fg=colour196,bg=colour234"
 
 # 리더 패인 포커스
 tmux select-pane -t "$SESSION:1.1"
+
+# 리더 패인에 prompts/leader.txt 가 적용된 claude 실행
+# (yaml 의 첫 panel 명령은 대기 메시지만 출력하고, 실제 claude 는 여기서 실행)
+tmux send-keys -t "$SESSION:1.1" "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=0 claude --dangerously-skip-permissions --name Leader --append-system-prompt \"\$(cat \"$SCRIPT_DIR/prompts/leader.txt\")\"" C-m
 
 # 세션 연결
 tmux attach-session -t "$SESSION"
